@@ -81,6 +81,7 @@
     select, .btn { background: var(--card); border: 1px solid rgba(255,255,255,0.2); color: var(--text); padding: 6px 8px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.78rem; transition: all 0.2s; flex: 1; min-width: 60px; text-align: center; }
     .btn-action { background: var(--accent); color: #000; border: none; }
     .btn-action:hover { opacity: 0.9; }
+    .btn-tourney { background: #a855f7; color: #fff; border: none; }
     .btn-pencil.active { background: var(--accent-success); color: #000; border: none; }
     .btn-blitz { background: #eab308; color: #000; border: none; }
 
@@ -125,11 +126,18 @@
     /* Modals */
     .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; z-index: 100; }
     .modal.active { display: flex; }
-    .modal-content { background: var(--card); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2); text-align: center; max-width: 340px; width: 90%; }
+    .modal-content { background: var(--card); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2); text-align: center; max-width: 360px; width: 92%; }
 
     .leader-table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.85rem; }
     .leader-table th, .leader-table td { padding: 6px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
     .leader-table th { color: var(--accent); }
+
+    /* Tournament Bracket CSS */
+    .bracket-container { display: flex; flex-direction: column; gap: 8px; margin: 12px 0; font-size: 0.75rem; text-align: left; }
+    .bracket-round-title { font-weight: bold; color: var(--accent); text-transform: uppercase; font-size: 0.7rem; margin-top: 4px; }
+    .bracket-match { background: var(--bg); padding: 6px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; }
+    .bracket-match.active-match { border-color: var(--accent); background: rgba(56, 189, 248, 0.15); }
+    .bracket-winner { color: var(--accent-success); font-weight: bold; }
 
     canvas#confetti { position: fixed; inset: 0; pointer-events: none; z-index: 99; }
   </style>
@@ -154,7 +162,8 @@
     <div class="profile-row">
       <button class="avatar-btn" onclick="cycleAvatar()" id="user-avatar">🥷</button>
       <input type="text" id="username-input" value="Player1" style="flex:1;" onchange="saveProfile()">
-      <button class="btn btn-action" onclick="quickMatch()">Quick Match ⚡</button>
+      <button class="btn btn-action" onclick="quickMatch()">Quick ⚡</button>
+      <button class="btn btn-tourney" onclick="startTournament()">🥊 Tourney</button>
     </div>
     <div class="lobby-row">
       <button class="btn" style="flex:1" onclick="createRoom()">Create Room 🏠</button>
@@ -232,8 +241,7 @@
     <div class="modal-content">
       <h2 id="modal-title">VICTORY!</h2>
       <p id="modal-desc">You crushed the match!</p>
-      <button class="btn btn-action" style="width:100%; margin-top:10px;" onclick="requestRematch()">Rematch ⚔️</button>
-      <button class="btn" style="width:100%; margin-top:6px;" onclick="closeModal(); startNewGame();">Next Match 🚀</button>
+      <button class="btn btn-action" id="modal-next-btn" style="width:100%; margin-top:10px;" onclick="closeModal(); startNextMatch();">Next Match 🚀</button>
     </div>
   </div>
 
@@ -248,6 +256,15 @@
         <tbody id="leader-body"></tbody>
       </table>
       <button class="btn btn-action" style="width:100%; margin-top:8px;" onclick="closeLeaderboard()">Close</button>
+    </div>
+  </div>
+
+  <!-- Tournament Bracket Modal -->
+  <div class="modal" id="tourney-modal">
+    <div class="modal-content">
+      <h2>🥊 8-Player Tournament</h2>
+      <div class="bracket-container" id="bracket-display"></div>
+      <button class="btn btn-action" style="width:100%; margin-top:10px;" id="tourney-play-btn" onclick="launchTourneyMatch()">Play Next Round ⚔️</button>
     </div>
   </div>
 
@@ -397,6 +414,109 @@
       }
     }
 
+    // Tournament Bracket System Logic
+    let tourneyActive = false;
+    let tourneyRound = 0; // 0 = Quarterfinals, 1 = Semifinals, 2 = Finals
+    let tourneyBracket = [];
+    const botPool = [
+      { name: "Viper 🐍", avatar: "🐍" },
+      { name: "Shadow 🥷", avatar: "🥷" },
+      { name: "Apex ⚡", avatar: "⚡" },
+      { name: "Titan 🛡️", avatar: "🛡️" },
+      { name: "Blaze 🔥", avatar: "🔥" },
+      { name: "Nova 🌟", avatar: "🌟" },
+      { name: "Cipher 🤖", avatar: "🤖" }
+    ];
+
+    function startTournament() {
+      tourneyActive = true;
+      tourneyRound = 0;
+      const avail = getAvailableAvatars();
+      const userPlayer = { name: `${username} (You)`, avatar: avail[currentAvatarIdx] || '🥷', isUser: true };
+      
+      const shuffledBots = [...botPool].sort(() => Math.random() - 0.5);
+      tourneyBracket = [
+        [
+          { p1: userPlayer, p2: shuffledBots[0], winner: null },
+          { p1: shuffledBots[1], p2: shuffledBots[2], winner: null },
+          { p1: shuffledBots[3], p2: shuffledBots[4], winner: null },
+          { p1: shuffledBots[5], p2: shuffledBots[6], winner: null }
+        ],
+        [ { p1: null, p2: null, winner: null }, { p1: null, p2: null, winner: null } ],
+        [ { p1: null, p2: null, winner: null } ]
+      ];
+
+      renderBracketModal();
+      document.getElementById('tourney-modal').classList.add('active');
+    }
+
+    function renderBracketModal() {
+      const container = document.getElementById('bracket-display');
+      const roundNames = ["Quarterfinals (8 Players)", "Semifinals (4 Players)", "Grand Finals (2 Players)"];
+      
+      let html = '';
+      tourneyBracket.forEach((round, rIdx) => {
+        html += `<div class="bracket-round-title">${roundNames[rIdx]}</div>`;
+        round.forEach((match, mIdx) => {
+          const isUserMatch = (rIdx === tourneyRound && (match.p1?.isUser || match.p2?.isUser));
+          const p1Text = match.p1 ? `${match.p1.name}` : 'TBD';
+          const p2Text = match.p2 ? `${match.p2.name}` : 'TBD';
+          
+          html += `
+            <div class="bracket-match ${isUserMatch ? 'active-match' : ''}">
+              <div>${p1Text} <small>vs</small> ${p2Text}</div>
+              <div class="bracket-winner">${match.winner ? '🏆 ' + match.winner.name : ''}</div>
+            </div>
+          `;
+        });
+      });
+      container.innerHTML = html;
+    }
+
+    function launchTourneyMatch() {
+      document.getElementById('tourney-modal').classList.remove('active');
+      const currentMatch = tourneyBracket[tourneyRound][0];
+      const opp = currentMatch.p1.isUser ? currentMatch.p2 : currentMatch.p1;
+      
+      document.getElementById('opp-label').innerText = `${opp.name}`;
+      document.getElementById('connection-status').innerText = `🥊 Tournament Round ${tourneyRound + 1}: vs ${opp.name}`;
+      startNewGame();
+    }
+
+    function advanceTournament(userWon) {
+      const currentMatch = tourneyBracket[tourneyRound][0];
+      currentMatch.winner = userWon ? currentMatch.p1 : currentMatch.p2;
+
+      // Simulate other bot matches in current round
+      tourneyBracket[tourneyRound].forEach((m, idx) => {
+        if (!m.winner) {
+          m.winner = Math.random() > 0.5 ? m.p1 : m.p2;
+        }
+      });
+
+      if (userWon) {
+        if (tourneyRound < 2) {
+          // Advance user to next round
+          const nextMatch = tourneyBracket[tourneyRound + 1][0];
+          nextMatch.p1 = currentMatch.winner;
+          nextMatch.p2 = tourneyBracket[tourneyRound][1].winner;
+          tourneyRound++;
+          renderBracketModal();
+          setTimeout(() => document.getElementById('tourney-modal').classList.add('active'), 1200);
+        } else {
+          // Won Grand Finals!
+          elo += 100;
+          localStorage.setItem('sudoku_elo', elo);
+          updateRankBadge();
+          saveToCloudLeaderboard();
+          alert("🎉 TOURNAMENT GRAND CHAMPION! Bonus +100 ELO Awarded!");
+          tourneyActive = false;
+        }
+      } else {
+        tourneyActive = false;
+      }
+    }
+
     // State & Board logic
     let solution = [], board = [], userBoard = [], candidates = Array.from({length: 81}, () => new Set());
     let selectedCell = null, timerInterval = null, secondsElapsed = 0;
@@ -432,6 +552,7 @@
     }
 
     function startDailyBlitz() {
+      tourneyActive = false;
       const todaySeed = parseInt(new Date().toISOString().slice(0,10).replace(/-/g,""));
       generateSudoku('medium', todaySeed);
       document.getElementById('connection-status').innerText = "📅 Playing Today's Daily Blitz Challenge!";
@@ -482,6 +603,7 @@
     }
 
     function quickMatch() {
+      tourneyActive = false;
       document.getElementById('connection-status').innerText = "⚡ Searching for opponent...";
       createRoom("MATCH");
     }
@@ -516,6 +638,7 @@
     }
 
     function joinRoom() {
+      tourneyActive = false;
       let inputVal = document.getElementById('room-code-input').value.trim().toUpperCase();
       if (!inputVal) return alert("Enter Room Code!");
       
@@ -585,13 +708,10 @@
       setTimeout(() => el.remove(), 2000);
     }
 
-    function requestRematch() {
-      if (conn && conn.open) {
-        conn.send({ type: 'rematch' });
-        closeModal();
-        if (isHost) startNewGame();
+    function startNextMatch() {
+      if (tourneyActive) {
+        launchTourneyMatch();
       } else {
-        closeModal();
         startNewGame();
       }
     }
@@ -759,6 +879,11 @@
       loadProfile();
       updateRankBadge();
       saveToCloudLeaderboard();
+
+      if (tourneyActive) {
+        advanceTournament(isWin);
+      }
+
       modal.classList.add('active');
     }
 

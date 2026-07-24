@@ -55,12 +55,20 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; user-select: none; touch-action: manipulation; }
     body { background-color: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 10px; transition: background 0.3s, color 0.3s; overflow-x: hidden; }
 
+    /* Screen Shake FX */
+    .shake { animation: shakeAnim 0.35s cubic-bezier(.36,.07,.19,.97) both; }
+    @keyframes shakeAnim {
+      10%, 90% { transform: translate3d(-2px, 0, 0); }
+      20%, 80% { transform: translate3d(3px, 0, 0); }
+      30%, 50%, 70% { transform: translate3d(-5px, 0, 0); }
+      40%, 60% { transform: translate3d(5px, 0, 0); }
+    }
+
     header { display: flex; justify-content: space-between; width: 100%; max-width: 500px; margin-bottom: 8px; align-items: center; }
     h1 { font-size: 1.3rem; color: var(--accent); letter-spacing: 0.5px; }
 
     .stats-bar { display: flex; gap: 4px; font-size: 0.75rem; background: var(--card); padding: 4px 8px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); align-items: center; }
 
-    /* Lobby Card */
     .lobby-card { width: 100%; max-width: 500px; background: var(--card); border-radius: 12px; padding: 10px; margin-bottom: 8px; border: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; gap: 6px; }
     .profile-row { display: flex; gap: 6px; align-items: center; }
     .avatar-btn { background: var(--bg); border: 1px solid rgba(255,255,255,0.2); font-size: 1.2rem; padding: 4px 8px; border-radius: 8px; cursor: pointer; }
@@ -68,7 +76,6 @@
 
     .lobby-row { display: flex; gap: 6px; }
 
-    /* Battle Progress */
     .battle-header { width: 100%; max-width: 500px; background: var(--card); border-radius: 12px; padding: 8px 10px; margin-bottom: 8px; border: 1px solid rgba(255,255,255,0.1); }
     .progress-label { display: flex; justify-content: space-between; font-size: 0.78rem; margin-bottom: 2px; font-weight: bold; }
     .progress-track { width: 100%; height: 6px; background: var(--bg); border-radius: 3px; overflow: hidden; margin-bottom: 4px; }
@@ -77,7 +84,6 @@
     .fill-opp { background: var(--accent-danger); }
     .fill-boss { background: #dc2626; }
 
-    /* Controls */
     .controls-top { display: flex; gap: 4px; width: 100%; max-width: 500px; margin-bottom: 8px; flex-wrap: wrap; }
     select, .btn { background: var(--card); border: 1px solid rgba(255,255,255,0.2); color: var(--text); padding: 6px 8px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.78rem; transition: all 0.2s; flex: 1; min-width: 60px; text-align: center; }
     .btn-action { background: var(--accent); color: #000; border: none; }
@@ -88,7 +94,6 @@
     .btn-pencil.active { background: var(--accent-success); color: #000; border: none; }
     .btn-blitz { background: #eab308; color: #000; border: none; }
 
-    /* Sudoku Board */
     .board-container { position: relative; width: 100%; max-width: 500px; aspect-ratio: 1; margin-bottom: 8px; }
     .grid { display: grid; grid-template-columns: repeat(9, 1fr); grid-template-rows: repeat(9, 1fr); gap: 1px; background: rgba(255,255,255,0.2); border: 2px solid rgba(255,255,255,0.2); border-radius: 8px; width: 100%; height: 100%; overflow: hidden; }
     .cell { background: var(--cell-bg); display: flex; align-items: center; justify-content: center; font-size: 1.3rem; font-weight: bold; cursor: pointer; position: relative; }
@@ -97,7 +102,6 @@
     .cell.selected { background: var(--cell-selected) !important; color: #fff; }
     .cell.related { background: var(--cell-highlight); }
 
-    /* Pencil Candidates */
     .pencil-grid { display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); width: 100%; height: 100%; pointer-events: none; }
     .pencil-num { font-size: 0.55rem; color: var(--pencil-text); display: flex; align-items: center; justify-content: center; font-weight: 600; }
 
@@ -105,7 +109,6 @@
     .cell:nth-child(9n) { border-right: none; }
     .cell:nth-child(n+19):nth-child(-n+27), .cell:nth-child(n+46):nth-child(-n+54) { border-bottom: 2px solid rgba(255,255,255,0.25); }
 
-    /* Powerups & Taunts */
     .powerups { display: flex; gap: 6px; width: 100%; max-width: 500px; margin-bottom: 6px; }
     .power-btn { flex: 1; padding: 6px; background: var(--card); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; cursor: pointer; font-size: 0.8rem; font-weight: bold; color: var(--text); }
 
@@ -113,20 +116,22 @@
     .taunt-btn { background: none; border: none; font-size: 1.2rem; cursor: pointer; transition: transform 0.1s; }
     .taunt-btn:hover { transform: scale(1.3); }
 
-    /* Numpad */
     .numpad { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; width: 100%; max-width: 500px; }
     .num-btn { background: var(--card); border: 1px solid rgba(255,255,255,0.2); color: var(--text); padding: 10px 0; font-size: 1.1rem; font-weight: bold; border-radius: 8px; cursor: pointer; text-align: center; }
     .num-btn:hover { background: var(--accent); color: #000; }
 
-    /* Overlays */
     .status-overlay { position: absolute; inset: 0; border-radius: 8px; display: none; align-items: center; justify-content: center; font-size: 1.4rem; font-weight: bold; backdrop-filter: blur(8px); z-index: 10; text-align: center; padding: 20px; }
     .overlay-frozen { background: rgba(56, 189, 248, 0.4); color: #fff; }
     .overlay-fog { background: rgba(0, 0, 0, 0.9); color: #fff; }
 
     .floating-taunt { position: fixed; bottom: 20%; left: 50%; transform: translateX(-50%); font-size: 4.5rem; z-index: 200; animation: floatUp 2s forwards ease-out; pointer-events: none; }
+    
+    /* Damage Popups FX */
+    .floating-damage { position: absolute; font-weight: 900; font-size: 1.4rem; color: #f43f5e; pointer-events: none; z-index: 50; animation: floatDamage 1s forwards ease-out; text-shadow: 0 0 8px rgba(0,0,0,0.8); }
+    @keyframes floatDamage { 0% { opacity: 1; transform: translateY(0) scale(0.8); } 50% { transform: translateY(-30px) scale(1.3); } 100% { opacity: 0; transform: translateY(-60px) scale(1); } }
+
     @keyframes floatUp { 0% { opacity: 1; transform: translate(-50%, 0) scale(0.5); } 50% { transform: translate(-50%, -80px) scale(1.3); } 100% { opacity: 0; transform: translate(-50%, -150px) scale(1); } }
 
-    /* Modals */
     .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; z-index: 100; }
     .modal.active { display: flex; }
     .modal-content { background: var(--card); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2); text-align: center; max-width: 360px; width: 92%; }
@@ -135,7 +140,6 @@
     .leader-table th, .leader-table td { padding: 6px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
     .leader-table th { color: var(--accent); }
 
-    /* Tournament Bracket CSS */
     .bracket-container { display: flex; flex-direction: column; gap: 8px; margin: 12px 0; font-size: 0.75rem; text-align: left; }
     .bracket-round-title { font-weight: bold; color: var(--accent); text-transform: uppercase; font-size: 0.7rem; margin-top: 4px; }
     .bracket-match { background: var(--bg); padding: 6px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; }
@@ -207,7 +211,7 @@
     </div>
   </div>
 
-  <div class="board-container">
+  <div class="board-container" id="board-container">
     <div class="grid" id="grid"></div>
     <div class="status-overlay overlay-frozen" id="frozen-overlay">🧊 YOU ARE FROZEN!<br>(5 Seconds)</div>
     <div class="status-overlay overlay-fog" id="fog-overlay">🌫️ FOG ATTACK!<br>Board Blinded!</div>
@@ -297,6 +301,21 @@
     let bgmInterval = null;
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     
+    function triggerShake() {
+      document.body.classList.add('shake');
+      setTimeout(() => document.body.classList.remove('shake'), 350);
+    }
+
+    function spawnDamagePopup(text) {
+      const el = document.createElement('div');
+      el.className = 'floating-damage';
+      el.innerText = text;
+      el.style.left = (50 + (Math.random() * 20 - 10)) + '%';
+      el.style.top = '40%';
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 1000);
+    }
+
     function playTone(freq, duration, type = 'sine') {
       if (soundMuted) return;
       try {
@@ -355,7 +374,7 @@
 
     const SFX = {
       click: () => { playTone(440, 0.08); haptic(); },
-      error: () => { playTone(140, 0.25, 'sawtooth'); if(navigator.vibrate) navigator.vibrate([40, 40, 40]); },
+      error: () => { playTone(140, 0.25, 'sawtooth'); triggerShake(); if(navigator.vibrate) navigator.vibrate([40, 40, 40]); },
       powerup: () => { playTone(520, 0.08); setTimeout(() => playTone(780, 0.12), 80); },
       win: () => { [523, 659, 783, 1046].forEach((f, i) => setTimeout(() => playTone(f, 0.18), i * 100)); }
     };
@@ -477,6 +496,8 @@
     function damageBoss(amount) {
       if (!bossMode || bossHP <= 0) return;
       bossHP = Math.max(0, bossHP - amount);
+      triggerShake();
+      spawnDamagePopup(`-${amount} HP 💥`);
       updateBossUI();
 
       if (conn && conn.open) {
@@ -754,6 +775,8 @@
           if (oppProgress >= 100 && !bossMode) triggerGameOver(false);
         } else if (data.type === 'boss_damage') {
           bossHP = Math.max(0, bossHP - data.amount);
+          triggerShake();
+          spawnDamagePopup(`-${data.amount} HP 💥`);
           updateBossUI();
           if (bossHP <= 0) triggerGameOver(true, "BOSS SLAIN IN CO-OP! ⚔️");
         } else if (data.type === 'attack') {
@@ -908,6 +931,7 @@
 
     function receiveAttack(type) {
       SFX.error();
+      triggerShake();
       if (type === 'freeze') {
         isFrozen = true;
         const ov = document.getElementById('frozen-overlay');

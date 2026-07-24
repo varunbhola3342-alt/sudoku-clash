@@ -75,6 +75,7 @@
     .progress-fill { height: 100%; width: 0%; transition: width 0.3s ease; }
     .fill-you { background: var(--accent); }
     .fill-opp { background: var(--accent-danger); }
+    .fill-boss { background: #dc2626; }
 
     /* Controls */
     .controls-top { display: flex; gap: 4px; width: 100%; max-width: 500px; margin-bottom: 8px; flex-wrap: wrap; }
@@ -82,6 +83,7 @@
     .btn-action { background: var(--accent); color: #000; border: none; }
     .btn-action:hover { opacity: 0.9; }
     .btn-tourney { background: #a855f7; color: #fff; border: none; }
+    .btn-boss { background: #dc2626; color: #fff; border: none; }
     .btn-share { background: #10b981; color: #000; border: none; }
     .btn-pencil.active { background: var(--accent-success); color: #000; border: none; }
     .btn-blitz { background: #eab308; color: #000; border: none; }
@@ -165,6 +167,7 @@
       <input type="text" id="username-input" value="Player1" style="flex:1;" onchange="saveProfile()">
       <button class="btn btn-action" onclick="quickMatch()">Quick ⚡</button>
       <button class="btn btn-tourney" onclick="startTournament()">🥊 Tourney</button>
+      <button class="btn btn-boss" onclick="startBossRaid()">👾 Boss</button>
     </div>
     <div class="lobby-row">
       <button class="btn" style="flex:1" onclick="createRoom()">Create Room 🏠</button>
@@ -194,11 +197,11 @@
   </div>
 
   <div class="battle-header">
-    <div class="player-progress">
+    <div class="player-progress" id="you-progress-panel">
       <div class="progress-label"><span id="you-label">You 🥷</span><span id="you-pct">0%</span></div>
       <div class="progress-track"><div id="you-bar" class="progress-fill fill-you"></div></div>
     </div>
-    <div class="player-progress">
+    <div class="player-progress" id="opp-progress-panel">
       <div class="progress-label"><span id="opp-label">Opponent Bot 🤖</span><span id="opp-pct">0%</span></div>
       <div class="progress-track"><div id="opp-bar" class="progress-fill fill-opp"></div></div>
     </div>
@@ -436,6 +439,56 @@
       }
     }
 
+    // Co-op Boss Raid Mode System Logic
+    let bossMode = false;
+    let bossHP = 1000;
+    let bossMaxHP = 1000;
+    let bossAttackInterval = null;
+
+    function startBossRaid() {
+      tourneyActive = false;
+      bossMode = true;
+      bossHP = 1000;
+      
+      document.getElementById('opp-label').innerText = "CYBER DRAGON 🐉";
+      document.getElementById('opp-bar').className = "progress-fill fill-boss";
+      document.getElementById('connection-status').innerText = "👾 Co-op Raid: Defeat the Cyber Dragon (1000 HP)!";
+      
+      updateBossUI();
+      startNewGame();
+
+      if (bossAttackInterval) clearInterval(bossAttackInterval);
+      bossAttackInterval = setInterval(() => {
+        if (bossMode && bossHP > 0) {
+          const attacks = ['freeze', 'fog'];
+          const randomAttack = attacks[Math.floor(Math.random() * attacks.length)];
+          receiveAttack(randomAttack);
+        }
+      }, 12000);
+    }
+
+    function updateBossUI() {
+      if (!bossMode) return;
+      let pct = Math.round((bossHP / bossMaxHP) * 100);
+      document.getElementById('opp-pct').innerText = `${bossHP} HP (${pct}%)`;
+      document.getElementById('opp-bar').style.width = pct + '%';
+    }
+
+    function damageBoss(amount) {
+      if (!bossMode || bossHP <= 0) return;
+      bossHP = Math.max(0, bossHP - amount);
+      updateBossUI();
+
+      if (conn && conn.open) {
+        conn.send({ type: 'boss_damage', amount: amount });
+      }
+
+      if (bossHP <= 0) {
+        if (bossAttackInterval) clearInterval(bossAttackInterval);
+        triggerGameOver(true, "BOSS SLAIN! ⚔️");
+      }
+    }
+
     // Tournament Bracket System Logic
     let tourneyActive = false;
     let tourneyRound = 0;
@@ -451,6 +504,7 @@
     ];
 
     function startTournament() {
+      bossMode = false;
       tourneyActive = true;
       tourneyRound = 0;
       const avail = getAvailableAvatars();
@@ -501,6 +555,7 @@
       const opp = currentMatch.p1.isUser ? currentMatch.p2 : currentMatch.p1;
       
       document.getElementById('opp-label').innerText = `${opp.name}`;
+      document.getElementById('opp-bar').className = "progress-fill fill-opp";
       document.getElementById('connection-status').innerText = `🥊 Tournament Round ${tourneyRound + 1}: vs ${opp.name}`;
       startNewGame();
     }
@@ -572,6 +627,8 @@
 
     function startDailyBlitz() {
       tourneyActive = false;
+      bossMode = false;
+      document.getElementById('opp-bar').className = "progress-fill fill-opp";
       const todaySeed = parseInt(new Date().toISOString().slice(0,10).replace(/-/g,""));
       generateSudoku('medium', todaySeed);
       document.getElementById('connection-status').innerText = "📅 Playing Today's Daily Blitz Challenge!";
@@ -623,6 +680,8 @@
 
     function quickMatch() {
       tourneyActive = false;
+      bossMode = false;
+      document.getElementById('opp-bar').className = "progress-fill fill-opp";
       document.getElementById('connection-status').innerText = "⚡ Searching for opponent...";
       createRoom("MATCH");
     }
@@ -649,7 +708,7 @@
           resetOpponentProgressUI();
           if (botInterval) clearInterval(botInterval);
           document.getElementById('connection-status').innerText = "🟢 Real Player Connected!";
-          document.getElementById('opp-label').innerText = "Real Opponent 👤";
+          document.getElementById('opp-label').innerText = "Real Partner 👤";
           setupConnection();
           syncBoardToPeer();
         });
@@ -658,6 +717,8 @@
 
     function joinRoom() {
       tourneyActive = false;
+      bossMode = false;
+      document.getElementById('opp-bar').className = "progress-fill fill-opp";
       let inputVal = document.getElementById('room-code-input').value.trim().toUpperCase();
       if (!inputVal) return alert("Enter Room Code!");
       
@@ -673,7 +734,7 @@
           resetOpponentProgressUI();
           if (botInterval) clearInterval(botInterval);
           document.getElementById('connection-status').innerText = "🟢 Connected to Host!";
-          document.getElementById('opp-label').innerText = "Host Opponent 👤";
+          document.getElementById('opp-label').innerText = "Host Partner 👤";
           setupConnection();
         });
       });
@@ -690,7 +751,11 @@
           oppProgress = data.value;
           document.getElementById('opp-bar').style.width = oppProgress + '%';
           document.getElementById('opp-pct').innerText = oppProgress + '%';
-          if (oppProgress >= 100) triggerGameOver(false);
+          if (oppProgress >= 100 && !bossMode) triggerGameOver(false);
+        } else if (data.type === 'boss_damage') {
+          bossHP = Math.max(0, bossHP - data.amount);
+          updateBossUI();
+          if (bossHP <= 0) triggerGameOver(true, "BOSS SLAIN IN CO-OP! ⚔️");
         } else if (data.type === 'attack') {
           receiveAttack(data.attack);
         } else if (data.type === 'taunt') {
@@ -798,8 +863,12 @@
         if (num === 0) {
           userBoard[selectedCell] = 0;
         } else {
-          if (num === solution[selectedCell]) SFX.click();
-          else SFX.error();
+          if (num === solution[selectedCell]) {
+            SFX.click();
+            if (bossMode) damageBoss(25);
+          } else {
+            SFX.error();
+          }
           userBoard[selectedCell] = num;
         }
       }
@@ -828,11 +897,12 @@
       if (type === 'hint' && selectedCell !== null && board[selectedCell] === 0) {
         userBoard[selectedCell] = solution[selectedCell];
         if (candidates[selectedCell]) candidates[selectedCell].clear();
+        if (bossMode) damageBoss(25);
         renderBoard();
       } else if (conn && conn.open) {
         conn.send({ type: 'attack', attack: type });
       } else {
-        if (type === 'freeze') oppProgress = Math.max(0, oppProgress - 8);
+        if (type === 'freeze' && !bossMode) oppProgress = Math.max(0, oppProgress - 8);
       }
     }
 
@@ -852,7 +922,7 @@
 
     function startBot() {
       if (botInterval) clearInterval(botInterval);
-      if (isOnline) return;
+      if (isOnline || bossMode) return;
       oppProgress = 0;
       botInterval = setInterval(() => {
         if (oppProgress < 100) {
@@ -869,9 +939,10 @@
       if (isComplete) triggerGameOver(true);
     }
 
-    function triggerGameOver(isWin) {
+    function triggerGameOver(isWin, customMsg = null) {
       clearInterval(timerInterval);
       if (botInterval) clearInterval(botInterval);
+      if (bossAttackInterval) clearInterval(bossAttackInterval);
 
       const modal = document.getElementById('game-modal');
       const title = document.getElementById('modal-title');
@@ -880,17 +951,17 @@
       if (isWin) {
         SFX.win();
         launchConfetti();
-        elo += 25;
+        elo += bossMode ? 150 : 25;
         streak += 1;
-        title.innerText = "VICTORY! 🏆";
-        desc.innerText = `Finished in ${secondsElapsed}s! +25 ELO (Streak: ${streak})`;
+        title.innerText = customMsg || "VICTORY! 🏆";
+        desc.innerText = `Finished in ${secondsElapsed}s! +${bossMode ? 150 : 25} ELO (Streak: ${streak})`;
       } else {
         SFX.error();
         elo = Math.max(800, elo - 15);
         streak = 0;
         title.innerText = "DEFEAT! 💀";
         title.style.color = "var(--accent-danger)";
-        desc.innerText = "Opponent solved their board first! -15 ELO";
+        desc.innerText = bossMode ? "The Dragon overwhelmed your team!" : "Opponent solved their board first! -15 ELO";
       }
 
       localStorage.setItem('sudoku_elo', elo);
@@ -988,7 +1059,7 @@
 
       renderBoard();
       syncBoardToPeer();
-      if (!isOnline) startBot();
+      if (!isOnline && !bossMode) startBot();
     }
 
     function startNewGame() {

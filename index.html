@@ -2,8 +2,15 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>Sudoku Clash 1v1 | Esports Arena</title>
+  
+  <!-- Mobile PWA Support -->
+  <meta name="theme-color" content="#0f172a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="data:application/manifest+json,{%22name%22:%22Sudoku%20Clash%201v1%22,%22short_name%22:%22SudokuClash%22,%22start_url%22:%22/%22,%22display%22:%22standalone%22,%22background_color%22:%22%230f172a%22,%22theme_color%22:%22%230f172a%22}">
+
   <!-- PeerJS Direct WebRTC -->
   <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
   <style>
@@ -40,7 +47,7 @@
       --cell-highlight: #cbd5e1; --given-text: #1e293b; --user-text: #2563eb; --pencil-text: #64748b;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; user-select: none; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; user-select: none; touch-action: manipulation; }
     body { background-color: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 10px; transition: background 0.3s, color 0.3s; overflow-x: hidden; }
 
     header { display: flex; justify-content: space-between; width: 100%; max-width: 500px; margin-bottom: 8px; align-items: center; }
@@ -48,7 +55,7 @@
 
     .stats-bar { display: flex; gap: 6px; font-size: 0.78rem; background: var(--card); padding: 4px 8px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); align-items: center; }
 
-    /* Profile / Lobby Card */
+    /* Lobby Card */
     .lobby-card { width: 100%; max-width: 500px; background: var(--card); border-radius: 12px; padding: 10px; margin-bottom: 8px; border: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; gap: 6px; }
     .profile-row { display: flex; gap: 6px; align-items: center; }
     .avatar-btn { background: var(--bg); border: 1px solid rgba(255,255,255,0.2); font-size: 1.2rem; padding: 4px 8px; border-radius: 8px; cursor: pointer; }
@@ -56,7 +63,7 @@
 
     .lobby-row { display: flex; gap: 6px; }
 
-    /* Progress Tracker */
+    /* Battle Progress */
     .battle-header { width: 100%; max-width: 500px; background: var(--card); border-radius: 12px; padding: 8px 10px; margin-bottom: 8px; border: 1px solid rgba(255,255,255,0.1); }
     .progress-label { display: flex; justify-content: space-between; font-size: 0.78rem; margin-bottom: 2px; font-weight: bold; }
     .progress-track { width: 100%; height: 6px; background: var(--bg); border-radius: 3px; overflow: hidden; margin-bottom: 4px; }
@@ -64,12 +71,13 @@
     .fill-you { background: var(--accent); }
     .fill-opp { background: var(--accent-danger); }
 
-    /* Controls Top */
+    /* Controls */
     .controls-top { display: flex; gap: 6px; width: 100%; max-width: 500px; margin-bottom: 8px; }
     select, .btn { background: var(--card); border: 1px solid rgba(255,255,255,0.2); color: var(--text); padding: 6px 8px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.8rem; transition: all 0.2s; }
     .btn-action { background: var(--accent); color: #000; border: none; }
     .btn-action:hover { opacity: 0.9; }
     .btn-pencil.active { background: var(--accent-success); color: #000; border: none; }
+    .btn-blitz { background: #eab308; color: #000; border: none; }
 
     /* Sudoku Board */
     .board-container { position: relative; width: 100%; max-width: 500px; aspect-ratio: 1; margin-bottom: 8px; }
@@ -80,7 +88,7 @@
     .cell.selected { background: var(--cell-selected) !important; color: #fff; }
     .cell.related { background: var(--cell-highlight); }
 
-    /* Candidate / Pencil Grid */
+    /* Pencil Candidates */
     .pencil-grid { display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); width: 100%; height: 100%; pointer-events: none; }
     .pencil-num { font-size: 0.55rem; color: var(--pencil-text); display: flex; align-items: center; justify-content: center; font-weight: 600; }
 
@@ -88,11 +96,10 @@
     .cell:nth-child(9n) { border-right: none; }
     .cell:nth-child(n+19):nth-child(-n+27), .cell:nth-child(n+46):nth-child(-n+54) { border-bottom: 2px solid rgba(255,255,255,0.25); }
 
-    /* Powerups */
+    /* Powerups & Taunts */
     .powerups { display: flex; gap: 6px; width: 100%; max-width: 500px; margin-bottom: 6px; }
     .power-btn { flex: 1; padding: 6px; background: var(--card); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; cursor: pointer; font-size: 0.8rem; font-weight: bold; color: var(--text); }
 
-    /* Taunts Bar */
     .taunt-bar { display: flex; justify-content: space-around; width: 100%; max-width: 500px; margin-bottom: 6px; background: var(--card); padding: 4px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); }
     .taunt-btn { background: none; border: none; font-size: 1.2rem; cursor: pointer; transition: transform 0.1s; }
     .taunt-btn:hover { transform: scale(1.3); }
@@ -102,7 +109,7 @@
     .num-btn { background: var(--card); border: 1px solid rgba(255,255,255,0.2); color: var(--text); padding: 10px 0; font-size: 1.1rem; font-weight: bold; border-radius: 8px; cursor: pointer; text-align: center; }
     .num-btn:hover { background: var(--accent); color: #000; }
 
-    /* Overlays & Floating FX */
+    /* Overlays */
     .status-overlay { position: absolute; inset: 0; border-radius: 8px; display: none; align-items: center; justify-content: center; font-size: 1.4rem; font-weight: bold; backdrop-filter: blur(8px); z-index: 10; text-align: center; padding: 20px; }
     .overlay-frozen { background: rgba(56, 189, 248, 0.4); color: #fff; }
     .overlay-fog { background: rgba(0, 0, 0, 0.9); color: #fff; }
@@ -110,9 +117,14 @@
     .floating-taunt { position: fixed; bottom: 20%; left: 50%; transform: translateX(-50%); font-size: 4.5rem; z-index: 200; animation: floatUp 2s forwards ease-out; pointer-events: none; }
     @keyframes floatUp { 0% { opacity: 1; transform: translate(-50%, 0) scale(0.5); } 50% { transform: translate(-50%, -80px) scale(1.3); } 100% { opacity: 0; transform: translate(-50%, -150px) scale(1); } }
 
-    .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 100; }
+    /* Modals */
+    .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; z-index: 100; }
     .modal.active { display: flex; }
-    .modal-content { background: var(--card); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2); text-align: center; max-width: 300px; width: 90%; }
+    .modal-content { background: var(--card); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2); text-align: center; max-width: 340px; width: 90%; }
+
+    .leader-table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.85rem; }
+    .leader-table th, .leader-table td { padding: 6px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .leader-table th { color: var(--accent); }
 
     canvas#confetti { position: fixed; inset: 0; pointer-events: none; z-index: 99; }
   </style>
@@ -124,9 +136,10 @@
   <header>
     <h1>Sudoku Clash ⚔️</h1>
     <div class="stats-bar">
+      <button class="btn" style="padding: 2px 5px; font-size: 0.7rem;" onclick="openLeaderboard()">🏆 Ranks</button>
       <button class="btn" style="padding: 2px 5px; font-size: 0.7rem;" onclick="toggleAudio()" id="audio-btn">🔊 ON</button>
       <span id="rank-badge">🥉</span>
-      <span><b id="elo-val">1000</b> ELO</span>
+      <span><b id="elo-val">1000</b></span>
       <span>⏱️ <b id="timer">00:00</b></span>
     </div>
   </header>
@@ -154,12 +167,8 @@
       <option value="arcade">8-Bit Arcade</option>
       <option value="light">Clean Light</option>
     </select>
-    <select id="diff-select" onchange="startNewGame()">
-      <option value="easy">Easy</option>
-      <option value="medium" selected>Medium</option>
-      <option value="hard">Hard</option>
-    </select>
-    <button class="btn btn-pencil" id="pencil-btn" onclick="togglePencil()">✏️ Pencil: OFF</button>
+    <button class="btn btn-blitz" onclick="startDailyBlitz()">📅 Blitz</button>
+    <button class="btn btn-pencil" id="pencil-btn" onclick="togglePencil()">✏️ Pencil</button>
     <button class="btn btn-action" onclick="startNewGame()">Reset 🔄</button>
   </div>
 
@@ -207,6 +216,7 @@
     <button class="num-btn" style="color:var(--accent-danger)" onclick="inputNumber(0)">⌫</button>
   </div>
 
+  <!-- Win/Loss Modal -->
   <div class="modal" id="game-modal">
     <div class="modal-content">
       <h2 id="modal-title">VICTORY!</h2>
@@ -216,9 +226,24 @@
     </div>
   </div>
 
+  <!-- Leaderboard Modal -->
+  <div class="modal" id="leaderboard-modal">
+    <div class="modal-content">
+      <h2>🏆 Global Leaderboard</h2>
+      <table class="leader-table">
+        <thead>
+          <tr><th>Rank</th><th>Player</th><th>ELO</th></tr>
+        </thead>
+        <tbody id="leader-body"></tbody>
+      </table>
+      <button class="btn btn-action" style="width:100%; margin-top:8px;" onclick="closeLeaderboard()">Close</button>
+    </div>
+  </div>
+
   <script>
     let soundMuted = false;
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    
     function playTone(freq, duration, type = 'sine') {
       if (soundMuted) return;
       try {
@@ -235,33 +260,50 @@
       } catch (e) {}
     }
 
+    function haptic() {
+      if (navigator.vibrate) navigator.vibrate(20);
+    }
+
     function toggleAudio() {
       soundMuted = !soundMuted;
       document.getElementById('audio-btn').innerText = soundMuted ? '🔇 OFF' : '🔊 ON';
     }
 
     const SFX = {
-      click: () => playTone(440, 0.08),
-      error: () => playTone(140, 0.25, 'sawtooth'),
+      click: () => { playTone(440, 0.08); haptic(); },
+      error: () => { playTone(140, 0.25, 'sawtooth'); if(navigator.vibrate) navigator.vibrate([40, 40, 40]); },
       powerup: () => { playTone(520, 0.08); setTimeout(() => playTone(780, 0.12), 80); },
       win: () => { [523, 659, 783, 1046].forEach((f, i) => setTimeout(() => playTone(f, 0.18), i * 100)); }
     };
 
-    // Profile & Avatars
-    const avatars = ['🥷', '👑', '🦊', '🤖', '🐉'];
+    // Profiles & Unlockable Avatars
+    const baseAvatars = ['🥷', '👑', '🦊', '🤖', '🐉'];
+    const streakAvatars = ['🦁', '⚡', '👽'];
+    let streak = parseInt(localStorage.getItem('sudoku_streak') || '0');
     let currentAvatarIdx = 0;
     let username = localStorage.getItem('sudoku_username') || ('Player_' + Math.floor(100 + Math.random()*900));
+
+    function getAvailableAvatars() {
+      let unlocked = [...baseAvatars];
+      if (streak >= 1) unlocked.push(streakAvatars[0]);
+      if (streak >= 3) unlocked.push(streakAvatars[1]);
+      if (streak >= 7) unlocked.push(streakAvatars[2]);
+      return unlocked;
+    }
 
     function loadProfile() {
       document.getElementById('username-input').value = username;
       currentAvatarIdx = parseInt(localStorage.getItem('sudoku_avatar_idx') || '0');
-      document.getElementById('user-avatar').innerText = avatars[currentAvatarIdx];
+      const avail = getAvailableAvatars();
+      if (currentAvatarIdx >= avail.length) currentAvatarIdx = 0;
+      document.getElementById('user-avatar').innerText = avail[currentAvatarIdx];
       updateLabels();
     }
 
     function cycleAvatar() {
-      currentAvatarIdx = (currentAvatarIdx + 1) % avatars.length;
-      document.getElementById('user-avatar').innerText = avatars[currentAvatarIdx];
+      const avail = getAvailableAvatars();
+      currentAvatarIdx = (currentAvatarIdx + 1) % avail.length;
+      document.getElementById('user-avatar').innerText = avail[currentAvatarIdx];
       localStorage.setItem('sudoku_avatar_idx', currentAvatarIdx);
       updateLabels();
     }
@@ -273,10 +315,11 @@
     }
 
     function updateLabels() {
-      document.getElementById('you-label').innerText = `${username} ${avatars[currentAvatarIdx]}`;
+      const avail = getAvailableAvatars();
+      document.getElementById('you-label').innerText = `${username} ${avail[currentAvatarIdx]}`;
     }
 
-    // State
+    // State & Board logic
     let solution = [], board = [], userBoard = [], candidates = Array.from({length: 81}, () => new Set());
     let selectedCell = null, timerInterval = null, secondsElapsed = 0;
     let powerups = { freeze: 1, fog: 1, hint: 2 };
@@ -301,33 +344,46 @@
     function togglePencil() {
       pencilMode = !pencilMode;
       const btn = document.getElementById('pencil-btn');
-      btn.innerText = pencilMode ? '✏️ Pencil: ON' : '✏️ Pencil: OFF';
+      btn.innerText = pencilMode ? '✏️ Pencil: ON' : '✏️ Pencil';
       btn.classList.toggle('active', pencilMode);
     }
 
-    function generateSudoku(diff) {
+    // Seeded Random Generator for Daily Blitz
+    function seededRandom(seed) {
+      let x = Math.sin(seed++) * 10000;
+      return x - Math.floor(x);
+    }
+
+    function startDailyBlitz() {
+      const todaySeed = parseInt(new Date().toISOString().slice(0,10).replace(/-/g,""));
+      generateSudoku('medium', todaySeed);
+      document.getElementById('connection-status').innerText = "📅 Playing Today's Daily Blitz Challenge!";
+      startNewGameUI();
+    }
+
+    function generateSudoku(diff, seed = null) {
       const base = Array.from({length: 81}, () => 0);
-      solveSudoku(base);
+      solveSudoku(base, seed);
       solution = [...base];
       const removal = { easy: 32, medium: 44, hard: 52 }[diff] || 44;
       board = [...solution];
       let removed = 0;
       while (removed < removal) {
-        let idx = Math.floor(Math.random() * 81);
+        let idx = Math.floor((seed ? seededRandom(seed + removed) : Math.random()) * 81);
         if (board[idx] !== 0) { board[idx] = 0; removed++; }
       }
       userBoard = [...board];
       candidates = Array.from({length: 81}, () => new Set());
     }
 
-    function solveSudoku(b) {
+    function solveSudoku(b, seed = null) {
       for (let i = 0; i < 81; i++) {
         if (b[i] === 0) {
-          let nums = [1,2,3,4,5,6,7,8,9].sort(() => Math.random() - 0.5);
+          let nums = [1,2,3,4,5,6,7,8,9].sort(() => (seed ? seededRandom(seed + i) : Math.random()) - 0.5);
           for (let num of nums) {
             if (isValid(b, i, num)) {
               b[i] = num;
-              if (solveSudoku(b)) return true;
+              if (solveSudoku(b, seed)) return true;
               b[i] = 0;
             }
           }
@@ -348,7 +404,7 @@
       return true;
     }
 
-    // WebRTC Matchmaking
+    // Networking
     function quickMatch() {
       document.getElementById('connection-status').innerText = "⚡ Searching for opponent...";
       createRoom("MATCH");
@@ -365,7 +421,7 @@
         const shortCode = id.replace(`${customPrefix}-`, '');
         document.getElementById('room-code-input').value = shortCode;
         navigator.clipboard.writeText(shortCode);
-        document.getElementById('connection-status').innerText = `🏠 Code: ${shortCode} (Copied to Clipboard!)`;
+        document.getElementById('connection-status').innerText = `🏠 Code: ${shortCode} (Copied!)`;
       });
 
       peer.on('connection', (c) => {
@@ -518,6 +574,7 @@
       if (selectedCell === null || board[selectedCell] !== 0 || isFrozen) return;
 
       if (pencilMode && num !== 0) {
+        SFX.click();
         if (candidates[selectedCell].has(num)) candidates[selectedCell].delete(num);
         else candidates[selectedCell].add(num);
       } else {
@@ -608,17 +665,21 @@
         SFX.win();
         launchConfetti();
         elo += 25;
+        streak += 1;
         title.innerText = "VICTORY! 🏆";
-        desc.innerText = `Finished in ${secondsElapsed}s! +25 ELO`;
+        desc.innerText = `Finished in ${secondsElapsed}s! +25 ELO (Streak: ${streak})`;
       } else {
         SFX.error();
         elo = Math.max(800, elo - 15);
+        streak = 0;
         title.innerText = "DEFEAT! 💀";
         title.style.color = "var(--accent-danger)";
         desc.innerText = "Opponent solved their board first! -15 ELO";
       }
 
       localStorage.setItem('sudoku_elo', elo);
+      localStorage.setItem('sudoku_streak', streak);
+      loadProfile();
       updateRankBadge();
       modal.classList.add('active');
     }
@@ -627,9 +688,33 @@
       document.getElementById('game-modal').classList.remove('active');
     }
 
-    function startNewGame() {
-      const diff = document.getElementById('diff-select').value;
-      generateSudoku(diff);
+    function openLeaderboard() {
+      const modal = document.getElementById('leaderboard-modal');
+      const tbody = document.getElementById('leader-body');
+      
+      const mockLeaders = [
+        { rank: 1, name: "CyberKing 👑", elo: 1650 },
+        { rank: 2, name: "GridMaster ⚡", elo: 1520 },
+        { rank: 3, name: "SudokuNinja 🥷", elo: 1440 },
+        { rank: 4, name: `${username} (You)`, elo: elo }
+      ].sort((a,b) => b.elo - a.elo);
+
+      tbody.innerHTML = mockLeaders.map((player, idx) => `
+        <tr>
+          <td>#${idx + 1}</td>
+          <td>${player.name}</td>
+          <td><b>${player.elo}</b></td>
+        </tr>
+      `).join('');
+
+      modal.classList.add('active');
+    }
+
+    function closeLeaderboard() {
+      document.getElementById('leaderboard-modal').classList.remove('active');
+    }
+
+    function startNewGameUI() {
       selectedCell = null;
       secondsElapsed = 0;
       powerups = { freeze: 1, fog: 1, hint: 2 };
@@ -649,6 +734,12 @@
       renderBoard();
       syncBoardToPeer();
       if (!isOnline) startBot();
+    }
+
+    function startNewGame() {
+      const diff = document.getElementById('diff-select').value;
+      generateSudoku(diff);
+      startNewGameUI();
     }
 
     function launchConfetti() {

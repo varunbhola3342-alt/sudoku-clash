@@ -72,8 +72,8 @@
     .fill-opp { background: var(--accent-danger); }
 
     /* Controls */
-    .controls-top { display: flex; gap: 6px; width: 100%; max-width: 500px; margin-bottom: 8px; }
-    select, .btn { background: var(--card); border: 1px solid rgba(255,255,255,0.2); color: var(--text); padding: 6px 8px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.8rem; transition: all 0.2s; }
+    .controls-top { display: flex; gap: 4px; width: 100%; max-width: 500px; margin-bottom: 8px; flex-wrap: wrap; }
+    select, .btn { background: var(--card); border: 1px solid rgba(255,255,255,0.2); color: var(--text); padding: 6px 8px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.78rem; transition: all 0.2s; flex: 1; min-width: 60px; text-align: center; }
     .btn-action { background: var(--accent); color: #000; border: none; }
     .btn-action:hover { opacity: 0.9; }
     .btn-pencil.active { background: var(--accent-success); color: #000; border: none; }
@@ -166,6 +166,11 @@
       <option value="cyberpunk">Cyberpunk Neon</option>
       <option value="arcade">8-Bit Arcade</option>
       <option value="light">Clean Light</option>
+    </select>
+    <select id="diff-select" onchange="startNewGame()">
+      <option value="easy">Easy</option>
+      <option value="medium" selected>Medium</option>
+      <option value="hard">Hard</option>
     </select>
     <button class="btn btn-blitz" onclick="startDailyBlitz()">📅 Blitz</button>
     <button class="btn btn-pencil" id="pencil-btn" onclick="togglePencil()">✏️ Pencil</button>
@@ -296,7 +301,7 @@
       currentAvatarIdx = parseInt(localStorage.getItem('sudoku_avatar_idx') || '0');
       const avail = getAvailableAvatars();
       if (currentAvatarIdx >= avail.length) currentAvatarIdx = 0;
-      document.getElementById('user-avatar').innerText = avail[currentAvatarIdx];
+      document.getElementById('user-avatar').innerText = avail[currentAvatarIdx] || '🥷';
       updateLabels();
     }
 
@@ -316,7 +321,8 @@
 
     function updateLabels() {
       const avail = getAvailableAvatars();
-      document.getElementById('you-label').innerText = `${username} ${avail[currentAvatarIdx]}`;
+      const currentAvatar = avail[currentAvatarIdx] || '🥷';
+      document.getElementById('you-label').innerText = `${username} ${currentAvatar}`;
     }
 
     // State & Board logic
@@ -522,6 +528,7 @@
 
     function renderBoard() {
       const grid = document.getElementById('grid');
+      if (!grid) return;
       grid.innerHTML = '';
       for (let i = 0; i < 81; i++) {
         const cell = document.createElement('div');
@@ -532,7 +539,7 @@
         } else if (userBoard[i] !== 0) {
           cell.innerText = userBoard[i];
           cell.classList.add('user-entered');
-        } else if (candidates[i].size > 0) {
+        } else if (candidates[i] && candidates[i].size > 0) {
           const pGrid = document.createElement('div');
           pGrid.className = 'pencil-grid';
           for (let n = 1; n <= 9; n++) {
@@ -578,7 +585,7 @@
         if (candidates[selectedCell].has(num)) candidates[selectedCell].delete(num);
         else candidates[selectedCell].add(num);
       } else {
-        candidates[selectedCell].clear();
+        if (candidates[selectedCell]) candidates[selectedCell].clear();
         if (num === 0) {
           userBoard[selectedCell] = 0;
         } else {
@@ -596,7 +603,7 @@
       userBoard.forEach((val, i) => {
         if (board[i] === 0 && val === solution[i]) filled++;
       });
-      let pct = Math.round((filled / totalEmpty) * 100);
+      let pct = totalEmpty > 0 ? Math.round((filled / totalEmpty) * 100) : 0;
       document.getElementById('you-bar').style.width = pct + '%';
       document.getElementById('you-pct').innerText = pct + '%';
 
@@ -611,7 +618,7 @@
 
       if (type === 'hint' && selectedCell !== null && board[selectedCell] === 0) {
         userBoard[selectedCell] = solution[selectedCell];
-        candidates[selectedCell].clear();
+        if (candidates[selectedCell]) candidates[selectedCell].clear();
         renderBoard();
       } else if (conn && conn.open) {
         conn.send({ type: 'attack', attack: type });
@@ -737,7 +744,8 @@
     }
 
     function startNewGame() {
-      const diff = document.getElementById('diff-select').value;
+      const diffElem = document.getElementById('diff-select');
+      const diff = diffElem ? diffElem.value : 'medium';
       generateSudoku(diff);
       startNewGameUI();
     }

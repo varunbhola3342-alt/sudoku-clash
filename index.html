@@ -82,6 +82,7 @@
     .btn-action { background: var(--accent); color: #000; border: none; }
     .btn-action:hover { opacity: 0.9; }
     .btn-tourney { background: #a855f7; color: #fff; border: none; }
+    .btn-share { background: #10b981; color: #000; border: none; }
     .btn-pencil.active { background: var(--accent-success); color: #000; border: none; }
     .btn-blitz { background: #eab308; color: #000; border: none; }
 
@@ -241,7 +242,8 @@
     <div class="modal-content">
       <h2 id="modal-title">VICTORY!</h2>
       <p id="modal-desc">You crushed the match!</p>
-      <button class="btn btn-action" id="modal-next-btn" style="width:100%; margin-top:10px;" onclick="closeModal(); startNextMatch();">Next Match 🚀</button>
+      <button class="btn btn-share" style="width:100%; margin-top:10px;" id="share-btn" onclick="shareResults()">Share Victory 📲</button>
+      <button class="btn btn-action" id="modal-next-btn" style="width:100%; margin-top:6px;" onclick="closeModal(); startNextMatch();">Next Match 🚀</button>
     </div>
   </div>
 
@@ -414,9 +416,29 @@
       }
     }
 
+    // Social Results Card Sharing
+    function shareResults() {
+      const avail = getAvailableAvatars();
+      const currentAvatar = avail[currentAvatarIdx] || '🥷';
+      const shareText = `⚔️ Sudoku Clash 1v1 Arena\nPlayer: ${username} ${currentAvatar}\n🏆 ELO: ${elo} | Streak: ${streak}🔥\nTime: ${secondsElapsed}s\nPlay live: ${window.location.href}`;
+      
+      if (navigator.share) {
+        navigator.share({
+          title: 'Sudoku Clash Result',
+          text: shareText,
+          url: window.location.href
+        }).catch(() => {});
+      } else {
+        navigator.clipboard.writeText(shareText);
+        const btn = document.getElementById('share-btn');
+        btn.innerText = 'Copied to Clipboard! 📋';
+        setTimeout(() => { btn.innerText = 'Share Victory 📲'; }, 2000);
+      }
+    }
+
     // Tournament Bracket System Logic
     let tourneyActive = false;
-    let tourneyRound = 0; // 0 = Quarterfinals, 1 = Semifinals, 2 = Finals
+    let tourneyRound = 0;
     let tourneyBracket = [];
     const botPool = [
       { name: "Viper 🐍", avatar: "🐍" },
@@ -487,7 +509,6 @@
       const currentMatch = tourneyBracket[tourneyRound][0];
       currentMatch.winner = userWon ? currentMatch.p1 : currentMatch.p2;
 
-      // Simulate other bot matches in current round
       tourneyBracket[tourneyRound].forEach((m, idx) => {
         if (!m.winner) {
           m.winner = Math.random() > 0.5 ? m.p1 : m.p2;
@@ -496,7 +517,6 @@
 
       if (userWon) {
         if (tourneyRound < 2) {
-          // Advance user to next round
           const nextMatch = tourneyBracket[tourneyRound + 1][0];
           nextMatch.p1 = currentMatch.winner;
           nextMatch.p2 = tourneyBracket[tourneyRound][1].winner;
@@ -504,7 +524,6 @@
           renderBracketModal();
           setTimeout(() => document.getElementById('tourney-modal').classList.add('active'), 1200);
         } else {
-          // Won Grand Finals!
           elo += 100;
           localStorage.setItem('sudoku_elo', elo);
           updateRankBadge();

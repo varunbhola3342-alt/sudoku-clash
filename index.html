@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sudoku Clash 1v1 | Online Arena</title>
-  <!-- PeerJS for WebRTC Direct Multiplayer -->
+  <!-- PeerJS WebRTC Direct Networking -->
   <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
   <style>
     :root {
@@ -21,49 +21,22 @@
       --user-text: #38bdf8;
     }
 
-    /* Cyberpunk Theme */
     [data-theme="cyberpunk"] {
-      --bg: #09090b;
-      --card: #18181b;
-      --accent: #f43f5e;
-      --accent-danger: #a855f7;
-      --accent-success: #22c55e;
-      --text: #fafafa;
-      --cell-bg: #27272a;
-      --cell-selected: #e11d48;
-      --cell-highlight: #3f3f46;
-      --given-text: #f43f5e;
-      --user-text: #38bdf8;
+      --bg: #09090b; --card: #18181b; --accent: #f43f5e; --accent-danger: #a855f7;
+      --accent-success: #22c55e; --text: #fafafa; --cell-bg: #27272a; --cell-selected: #e11d48;
+      --cell-highlight: #3f3f46; --given-text: #f43f5e; --user-text: #38bdf8;
     }
 
-    /* Arcade Theme */
     [data-theme="arcade"] {
-      --bg: #1a0b2e;
-      --card: #2b1055;
-      --accent: #eab308;
-      --accent-danger: #ef4444;
-      --accent-success: #10b981;
-      --text: #ffffff;
-      --cell-bg: #40187e;
-      --cell-selected: #ca8a04;
-      --cell-highlight: #5b21b6;
-      --given-text: #facc15;
-      --user-text: #4ade80;
+      --bg: #1a0b2e; --card: #2b1055; --accent: #eab308; --accent-danger: #ef4444;
+      --accent-success: #10b981; --text: #ffffff; --cell-bg: #40187e; --cell-selected: #ca8a04;
+      --cell-highlight: #5b21b6; --given-text: #facc15; --user-text: #4ade80;
     }
 
-    /* Light Theme */
     [data-theme="light"] {
-      --bg: #f1f5f9;
-      --card: #ffffff;
-      --accent: #2563eb;
-      --accent-danger: #dc2626;
-      --accent-success: #16a34a;
-      --text: #0f172a;
-      --cell-bg: #e2e8f0;
-      --cell-selected: #93c5fd;
-      --cell-highlight: #cbd5e1;
-      --given-text: #1e293b;
-      --user-text: #2563eb;
+      --bg: #f1f5f9; --card: #ffffff; --accent: #2563eb; --accent-danger: #dc2626;
+      --accent-success: #16a34a; --text: #0f172a; --cell-bg: #e2e8f0; --cell-selected: #93c5fd;
+      --cell-highlight: #cbd5e1; --given-text: #1e293b; --user-text: #2563eb;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; user-select: none; }
@@ -74,12 +47,10 @@
 
     .stats-bar { display: flex; gap: 8px; font-size: 0.8rem; background: var(--card); padding: 5px 10px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); }
 
-    /* Lobby Panel */
     .lobby-card { width: 100%; max-width: 500px; background: var(--card); border-radius: 12px; padding: 12px; margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; gap: 8px; }
     .lobby-row { display: flex; gap: 8px; }
-    input[type="text"] { background: var(--bg); border: 1px solid rgba(255,255,255,0.2); color: var(--text); padding: 8px; border-radius: 8px; flex: 1; font-weight: bold; text-align: center; }
+    input[type="text"] { background: var(--bg); border: 1px solid rgba(255,255,255,0.2); color: var(--text); padding: 8px; border-radius: 8px; flex: 1; font-weight: bold; text-align: center; text-transform: uppercase; }
 
-    /* Battle Header */
     .battle-header { width: 100%; max-width: 500px; background: var(--card); border-radius: 12px; padding: 10px; margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.1); }
     .progress-label { display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 3px; font-weight: bold; }
     .progress-track { width: 100%; height: 6px; background: var(--bg); border-radius: 3px; overflow: hidden; margin-bottom: 6px; }
@@ -87,13 +58,11 @@
     .fill-you { background: var(--accent); }
     .fill-opp { background: var(--accent-danger); }
 
-    /* Controls */
     .controls-top { display: flex; gap: 8px; width: 100%; max-width: 500px; margin-bottom: 10px; }
     select, .btn { background: var(--card); border: 1px solid rgba(255,255,255,0.2); color: var(--text); padding: 8px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.85rem; transition: all 0.2s; }
     .btn-action { background: var(--accent); color: #000; border: none; }
     .btn-action:hover { opacity: 0.9; }
 
-    /* Grid */
     .board-container { position: relative; width: 100%; max-width: 500px; aspect-ratio: 1; margin-bottom: 10px; }
     .grid { display: grid; grid-template-columns: repeat(9, 1fr); grid-template-rows: repeat(9, 1fr); gap: 1px; background: rgba(255,255,255,0.2); border: 2px solid rgba(255,255,255,0.2); border-radius: 8px; width: 100%; height: 100%; overflow: hidden; }
     .cell { background: var(--cell-bg); display: flex; align-items: center; justify-content: center; font-size: 1.3rem; font-weight: bold; cursor: pointer; }
@@ -102,27 +71,22 @@
     .cell.selected { background: var(--cell-selected) !important; color: #fff; }
     .cell.related { background: var(--cell-highlight); }
 
-    /* 3x3 Borders */
     .cell:nth-child(3n) { border-right: 2px solid rgba(255,255,255,0.25); }
     .cell:nth-child(9n) { border-right: none; }
     .cell:nth-child(n+19):nth-child(-n+27), .cell:nth-child(n+46):nth-child(-n+54) { border-bottom: 2px solid rgba(255,255,255,0.25); }
 
-    /* Powerups */
     .powerups { display: flex; gap: 8px; width: 100%; max-width: 500px; margin-bottom: 10px; }
     .power-btn { flex: 1; padding: 8px; background: var(--card); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: bold; color: var(--text); }
     .power-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
-    /* Numpad */
     .numpad { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; width: 100%; max-width: 500px; }
     .num-btn { background: var(--card); border: 1px solid rgba(255,255,255,0.2); color: var(--text); padding: 12px 0; font-size: 1.1rem; font-weight: bold; border-radius: 8px; cursor: pointer; text-align: center; }
     .num-btn:hover { background: var(--accent); color: #000; }
 
-    /* Overlays */
     .status-overlay { position: absolute; inset: 0; border-radius: 8px; display: none; align-items: center; justify-content: center; font-size: 1.4rem; font-weight: bold; backdrop-filter: blur(8px); z-index: 10; text-align: center; padding: 20px; }
     .overlay-frozen { background: rgba(56, 189, 248, 0.4); color: #fff; }
     .overlay-fog { background: rgba(0, 0, 0, 0.9); color: #fff; }
 
-    /* Modal */
     .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 100; }
     .modal.active { display: flex; }
     .modal-content { background: var(--card); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2); text-align: center; max-width: 300px; width: 90%; }
@@ -145,11 +109,11 @@
   <div class="lobby-card">
     <div class="lobby-row">
       <button class="btn btn-action" style="flex:1" onclick="createRoom()">Create Room 🏠</button>
-      <input type="text" id="room-code-input" placeholder="ROOM CODE" maxlength="6">
+      <input type="text" id="room-code-input" placeholder="ROOM CODE" maxlength="10">
       <button class="btn" onclick="joinRoom()">Join 🔗</button>
     </div>
     <div id="connection-status" style="font-size:0.8rem; text-align:center; color: var(--accent);">
-      Mode: Solo vs AI Bot (Or create/join room for 1v1)
+      Mode: Practice vs AI Bot (Create room for 1v1)
     </div>
   </div>
 
@@ -213,7 +177,6 @@
   </div>
 
   <script>
-    // Audio Synthesizer
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function playTone(freq, duration, type = 'sine') {
       try {
@@ -237,14 +200,12 @@
       win: () => { [523, 659, 783, 1046].forEach((f, i) => setTimeout(() => playTone(f, 0.18), i * 100)); }
     };
 
-    // Global State
     let solution = [], board = [], userBoard = [];
     let selectedCell = null, timerInterval = null, secondsElapsed = 0;
     let powerups = { freeze: 1, fog: 1, hint: 2 };
     let isFrozen = false, oppProgress = 0, botInterval = null;
     let elo = parseInt(localStorage.getItem('sudoku_elo') || '1000');
 
-    // PeerJS Online State
     let peer = null, conn = null, isHost = false, isOnline = false;
 
     document.getElementById('elo-val').innerText = elo;
@@ -253,7 +214,6 @@
       document.documentElement.setAttribute('data-theme', themeName);
     }
 
-    // Sudoku Generator
     function generateSudoku(diff) {
       const base = Array.from({length: 81}, () => 0);
       solveSudoku(base);
@@ -296,45 +256,55 @@
       return true;
     }
 
-    // Multiplayer Networking (WebRTC)
-    function initPeer(id = null) {
-      peer = id ? new Peer(id) : new Peer();
-      peer.on('open', (peerId) => {
-        if (isHost) {
-          document.getElementById('connection-status').innerText = `Room Ready! Code: ${peerId.substring(0, 6).toUpperCase()}`;
-          document.getElementById('room-code-input').value = peerId.substring(0, 6).toUpperCase();
-        }
+    // Fixed WebRTC Direct Networking
+    function createRoom() {
+      isHost = true;
+      const rawCode = Math.random().toString(36).substring(2, 6).toUpperCase();
+      const code = 'SUDO-' + rawCode;
+      
+      peer = new Peer(code);
+      
+      peer.on('open', (id) => {
+        const shortCode = id.replace('SUDO-', '');
+        document.getElementById('room-code-input').value = shortCode;
+        navigator.clipboard.writeText(shortCode);
+        document.getElementById('connection-status').innerText = `🏠 Room Code: ${shortCode} (Copied to Clipboard!)`;
       });
 
       peer.on('connection', (c) => {
         conn = c;
-        setupConnection();
-        document.getElementById('connection-status').innerText = "🟢 Real Player Connected! Game Syncing...";
-        document.getElementById('opp-label').innerText = "Real Opponent 👤";
-        isOnline = true;
-        if (botInterval) clearInterval(botInterval);
-        syncBoardToPeer();
+        c.on('open', () => {
+          isOnline = true;
+          if (botInterval) clearInterval(botInterval);
+          document.getElementById('connection-status').innerText = "🟢 Real Player Connected! Game Synced!";
+          document.getElementById('opp-label').innerText = "Real Opponent 👤";
+          setupConnection();
+          syncBoardToPeer();
+        });
+      });
+
+      peer.on('error', (err) => {
+        document.getElementById('connection-status').innerText = "⚠️ Room error. Retrying...";
       });
     }
 
-    function createRoom() {
-      isHost = true;
-      const code = 'SUDO-' + Math.floor(1000 + Math.random() * 9000);
-      initPeer(code);
-    }
-
     function joinRoom() {
-      const code = document.getElementById('room-code-input').value.trim();
-      if (!code) return alert("Enter a room code!");
+      let inputVal = document.getElementById('room-code-input').value.trim().toUpperCase();
+      if (!inputVal) return alert("Please enter a 4-letter Room Code!");
+      
+      const fullCode = inputVal.startsWith('SUDO-') ? inputVal : 'SUDO-' + inputVal;
       peer = new Peer();
+
       peer.on('open', () => {
-        conn = peer.connect(code.startsWith('SUDO-') ? code : 'SUDO-' + code);
-        setupConnection();
-        isHost = false;
-        isOnline = true;
-        document.getElementById('connection-status').innerText = "🟢 Connected to Room Host!";
-        document.getElementById('opp-label').innerText = "Host Opponent 👤";
-        if (botInterval) clearInterval(botInterval);
+        conn = peer.connect(fullCode);
+        conn.on('open', () => {
+          isHost = false;
+          isOnline = true;
+          if (botInterval) clearInterval(botInterval);
+          document.getElementById('connection-status').innerText = "🟢 Connected to Room Host!";
+          document.getElementById('opp-label').innerText = "Host Opponent 👤";
+          setupConnection();
+        });
       });
     }
 
@@ -357,12 +327,11 @@
     }
 
     function syncBoardToPeer() {
-      if (conn && isHost) {
+      if (conn && conn.open) {
         conn.send({ type: 'sync', solution, board });
       }
     }
 
-    // Board & Controls
     function renderBoard() {
       const grid = document.getElementById('grid');
       grid.innerHTML = '';
@@ -425,10 +394,9 @@
       document.getElementById('you-bar').style.width = pct + '%';
       document.getElementById('you-pct').innerText = pct + '%';
 
-      if (conn) conn.send({ type: 'progress', value: pct });
+      if (conn && conn.open) conn.send({ type: 'progress', value: pct });
     }
 
-    // Power-Up Attacks
     function usePowerup(type) {
       if (powerups[type] <= 0) return;
       SFX.powerup();
@@ -438,10 +406,9 @@
       if (type === 'hint' && selectedCell !== null && board[selectedCell] === 0) {
         userBoard[selectedCell] = solution[selectedCell];
         renderBoard();
-      } else if (conn) {
+      } else if (conn && conn.open) {
         conn.send({ type: 'attack', attack: type });
       } else {
-        // AI Bot Fallback Attack Simulation
         if (type === 'freeze') oppProgress = Math.max(0, oppProgress - 8);
       }
     }
@@ -460,7 +427,6 @@
       }
     }
 
-    // Singleplayer Bot Fallback
     function startBot() {
       if (botInterval) clearInterval(botInterval);
       if (isOnline) return;

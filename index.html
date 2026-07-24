@@ -53,7 +53,7 @@
     header { display: flex; justify-content: space-between; width: 100%; max-width: 500px; margin-bottom: 8px; align-items: center; }
     h1 { font-size: 1.3rem; color: var(--accent); letter-spacing: 0.5px; }
 
-    .stats-bar { display: flex; gap: 6px; font-size: 0.78rem; background: var(--card); padding: 4px 8px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); align-items: center; }
+    .stats-bar { display: flex; gap: 4px; font-size: 0.75rem; background: var(--card); padding: 4px 8px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); align-items: center; }
 
     /* Lobby Card */
     .lobby-card { width: 100%; max-width: 500px; background: var(--card); border-radius: 12px; padding: 10px; margin-bottom: 8px; border: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; gap: 6px; }
@@ -136,8 +136,9 @@
   <header>
     <h1>Sudoku Clash ⚔️</h1>
     <div class="stats-bar">
-      <button class="btn" style="padding: 2px 5px; font-size: 0.7rem;" onclick="openLeaderboard()">🏆 Ranks</button>
-      <button class="btn" style="padding: 2px 5px; font-size: 0.7rem;" onclick="toggleAudio()" id="audio-btn">🔊 ON</button>
+      <button class="btn" style="padding: 2px 5px; font-size: 0.65rem;" onclick="openLeaderboard()">🏆 Ranks</button>
+      <button class="btn" style="padding: 2px 5px; font-size: 0.65rem;" onclick="toggleBGM()" id="bgm-btn">🎵 BGM: OFF</button>
+      <button class="btn" style="padding: 2px 5px; font-size: 0.65rem;" onclick="toggleAudio()" id="audio-btn">🔊 SFX: ON</button>
       <span id="rank-badge">🥉</span>
       <span><b id="elo-val">1000</b></span>
       <span>⏱️ <b id="timer">00:00</b></span>
@@ -247,6 +248,8 @@
 
   <script>
     let soundMuted = false;
+    let bgmMuted = true;
+    let bgmInterval = null;
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     
     function playTone(freq, duration, type = 'sine') {
@@ -265,13 +268,44 @@
       } catch (e) {}
     }
 
+    // 8-Bit Procedural BGM Generator
+    const bgmNotes = [164.81, 196.00, 220.00, 246.94, 261.63, 220.00, 196.00, 164.81];
+    let noteStep = 0;
+
+    function toggleBGM() {
+      bgmMuted = !bgmMuted;
+      const btn = document.getElementById('bgm-btn');
+      btn.innerText = bgmMuted ? '🎵 BGM: OFF' : '🎵 BGM: ON';
+
+      if (!bgmMuted) {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        bgmInterval = setInterval(() => {
+          try {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'square';
+            osc.frequency.value = bgmNotes[noteStep % bgmNotes.length];
+            gain.gain.setValueAtTime(0.03, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.18);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.18);
+            noteStep++;
+          } catch(e) {}
+        }, 220);
+      } else {
+        clearInterval(bgmInterval);
+      }
+    }
+
     function haptic() {
       if (navigator.vibrate) navigator.vibrate(20);
     }
 
     function toggleAudio() {
       soundMuted = !soundMuted;
-      document.getElementById('audio-btn').innerText = soundMuted ? '🔇 OFF' : '🔊 ON';
+      document.getElementById('audio-btn').innerText = soundMuted ? '🔇 SFX: OFF' : '🔊 SFX: ON';
     }
 
     const SFX = {
@@ -354,7 +388,6 @@
       btn.classList.toggle('active', pencilMode);
     }
 
-    // Seeded Random Generator for Daily Blitz
     function seededRandom(seed) {
       let x = Math.sin(seed++) * 10000;
       return x - Math.floor(x);
@@ -410,7 +443,6 @@
       return true;
     }
 
-    // Networking
     function quickMatch() {
       document.getElementById('connection-status').innerText = "⚡ Searching for opponent...";
       createRoom("MATCH");

@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sudoku Clash 1v1 | Online Arena</title>
-  <!-- PeerJS WebRTC Direct Networking -->
+  <title>Sudoku Clash 1v1 | Esports Arena</title>
+  <!-- PeerJS Direct WebRTC -->
   <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
   <style>
     :root {
@@ -19,73 +19,96 @@
       --cell-highlight: #475569;
       --given-text: #e2e8f0;
       --user-text: #38bdf8;
+      --pencil-text: #94a3b8;
     }
 
     [data-theme="cyberpunk"] {
       --bg: #09090b; --card: #18181b; --accent: #f43f5e; --accent-danger: #a855f7;
       --accent-success: #22c55e; --text: #fafafa; --cell-bg: #27272a; --cell-selected: #e11d48;
-      --cell-highlight: #3f3f46; --given-text: #f43f5e; --user-text: #38bdf8;
+      --cell-highlight: #3f3f46; --given-text: #f43f5e; --user-text: #38bdf8; --pencil-text: #a1a1aa;
     }
 
     [data-theme="arcade"] {
       --bg: #1a0b2e; --card: #2b1055; --accent: #eab308; --accent-danger: #ef4444;
       --accent-success: #10b981; --text: #ffffff; --cell-bg: #40187e; --cell-selected: #ca8a04;
-      --cell-highlight: #5b21b6; --given-text: #facc15; --user-text: #4ade80;
+      --cell-highlight: #5b21b6; --given-text: #facc15; --user-text: #4ade80; --pencil-text: #c084fc;
     }
 
     [data-theme="light"] {
       --bg: #f1f5f9; --card: #ffffff; --accent: #2563eb; --accent-danger: #dc2626;
       --accent-success: #16a34a; --text: #0f172a; --cell-bg: #e2e8f0; --cell-selected: #93c5fd;
-      --cell-highlight: #cbd5e1; --given-text: #1e293b; --user-text: #2563eb;
+      --cell-highlight: #cbd5e1; --given-text: #1e293b; --user-text: #2563eb; --pencil-text: #64748b;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; user-select: none; }
-    body { background-color: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 12px; transition: background 0.3s, color 0.3s; }
+    body { background-color: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 10px; transition: background 0.3s, color 0.3s; overflow-x: hidden; }
 
-    header { display: flex; justify-content: space-between; width: 100%; max-width: 500px; margin-bottom: 10px; align-items: center; }
-    h1 { font-size: 1.4rem; color: var(--accent); letter-spacing: 0.5px; }
+    header { display: flex; justify-content: space-between; width: 100%; max-width: 500px; margin-bottom: 8px; align-items: center; }
+    h1 { font-size: 1.3rem; color: var(--accent); letter-spacing: 0.5px; }
 
-    .stats-bar { display: flex; gap: 8px; font-size: 0.8rem; background: var(--card); padding: 5px 10px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); }
+    .stats-bar { display: flex; gap: 6px; font-size: 0.78rem; background: var(--card); padding: 4px 8px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); align-items: center; }
 
-    .lobby-card { width: 100%; max-width: 500px; background: var(--card); border-radius: 12px; padding: 12px; margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; gap: 8px; }
-    .lobby-row { display: flex; gap: 8px; }
-    input[type="text"] { background: var(--bg); border: 1px solid rgba(255,255,255,0.2); color: var(--text); padding: 8px; border-radius: 8px; flex: 1; font-weight: bold; text-align: center; text-transform: uppercase; }
+    /* Profile / Lobby Card */
+    .lobby-card { width: 100%; max-width: 500px; background: var(--card); border-radius: 12px; padding: 10px; margin-bottom: 8px; border: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; gap: 6px; }
+    .profile-row { display: flex; gap: 6px; align-items: center; }
+    .avatar-btn { background: var(--bg); border: 1px solid rgba(255,255,255,0.2); font-size: 1.2rem; padding: 4px 8px; border-radius: 8px; cursor: pointer; }
+    input[type="text"] { background: var(--bg); border: 1px solid rgba(255,255,255,0.2); color: var(--text); padding: 6px 8px; border-radius: 8px; font-weight: bold; font-size: 0.85rem; }
 
-    .battle-header { width: 100%; max-width: 500px; background: var(--card); border-radius: 12px; padding: 10px; margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.1); }
-    .progress-label { display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 3px; font-weight: bold; }
-    .progress-track { width: 100%; height: 6px; background: var(--bg); border-radius: 3px; overflow: hidden; margin-bottom: 6px; }
+    .lobby-row { display: flex; gap: 6px; }
+
+    /* Progress Tracker */
+    .battle-header { width: 100%; max-width: 500px; background: var(--card); border-radius: 12px; padding: 8px 10px; margin-bottom: 8px; border: 1px solid rgba(255,255,255,0.1); }
+    .progress-label { display: flex; justify-content: space-between; font-size: 0.78rem; margin-bottom: 2px; font-weight: bold; }
+    .progress-track { width: 100%; height: 6px; background: var(--bg); border-radius: 3px; overflow: hidden; margin-bottom: 4px; }
     .progress-fill { height: 100%; width: 0%; transition: width 0.3s ease; }
     .fill-you { background: var(--accent); }
     .fill-opp { background: var(--accent-danger); }
 
-    .controls-top { display: flex; gap: 8px; width: 100%; max-width: 500px; margin-bottom: 10px; }
-    select, .btn { background: var(--card); border: 1px solid rgba(255,255,255,0.2); color: var(--text); padding: 8px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.85rem; transition: all 0.2s; }
+    /* Controls Top */
+    .controls-top { display: flex; gap: 6px; width: 100%; max-width: 500px; margin-bottom: 8px; }
+    select, .btn { background: var(--card); border: 1px solid rgba(255,255,255,0.2); color: var(--text); padding: 6px 8px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.8rem; transition: all 0.2s; }
     .btn-action { background: var(--accent); color: #000; border: none; }
     .btn-action:hover { opacity: 0.9; }
+    .btn-pencil.active { background: var(--accent-success); color: #000; border: none; }
 
-    .board-container { position: relative; width: 100%; max-width: 500px; aspect-ratio: 1; margin-bottom: 10px; }
+    /* Sudoku Board */
+    .board-container { position: relative; width: 100%; max-width: 500px; aspect-ratio: 1; margin-bottom: 8px; }
     .grid { display: grid; grid-template-columns: repeat(9, 1fr); grid-template-rows: repeat(9, 1fr); gap: 1px; background: rgba(255,255,255,0.2); border: 2px solid rgba(255,255,255,0.2); border-radius: 8px; width: 100%; height: 100%; overflow: hidden; }
-    .cell { background: var(--cell-bg); display: flex; align-items: center; justify-content: center; font-size: 1.3rem; font-weight: bold; cursor: pointer; }
-    .cell.given { color: var(--given-text); font-weight: 900; opacity: 0.8; }
+    .cell { background: var(--cell-bg); display: flex; align-items: center; justify-content: center; font-size: 1.3rem; font-weight: bold; cursor: pointer; position: relative; }
+    .cell.given { color: var(--given-text); font-weight: 900; opacity: 0.85; }
     .cell.user-entered { color: var(--user-text); }
     .cell.selected { background: var(--cell-selected) !important; color: #fff; }
     .cell.related { background: var(--cell-highlight); }
+
+    /* Candidate / Pencil Grid */
+    .pencil-grid { display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); width: 100%; height: 100%; pointer-events: none; }
+    .pencil-num { font-size: 0.55rem; color: var(--pencil-text); display: flex; align-items: center; justify-content: center; font-weight: 600; }
 
     .cell:nth-child(3n) { border-right: 2px solid rgba(255,255,255,0.25); }
     .cell:nth-child(9n) { border-right: none; }
     .cell:nth-child(n+19):nth-child(-n+27), .cell:nth-child(n+46):nth-child(-n+54) { border-bottom: 2px solid rgba(255,255,255,0.25); }
 
-    .powerups { display: flex; gap: 8px; width: 100%; max-width: 500px; margin-bottom: 10px; }
-    .power-btn { flex: 1; padding: 8px; background: var(--card); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: bold; color: var(--text); }
-    .power-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+    /* Powerups */
+    .powerups { display: flex; gap: 6px; width: 100%; max-width: 500px; margin-bottom: 6px; }
+    .power-btn { flex: 1; padding: 6px; background: var(--card); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; cursor: pointer; font-size: 0.8rem; font-weight: bold; color: var(--text); }
 
+    /* Taunts Bar */
+    .taunt-bar { display: flex; justify-content: space-around; width: 100%; max-width: 500px; margin-bottom: 6px; background: var(--card); padding: 4px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); }
+    .taunt-btn { background: none; border: none; font-size: 1.2rem; cursor: pointer; transition: transform 0.1s; }
+    .taunt-btn:hover { transform: scale(1.3); }
+
+    /* Numpad */
     .numpad { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; width: 100%; max-width: 500px; }
-    .num-btn { background: var(--card); border: 1px solid rgba(255,255,255,0.2); color: var(--text); padding: 12px 0; font-size: 1.1rem; font-weight: bold; border-radius: 8px; cursor: pointer; text-align: center; }
+    .num-btn { background: var(--card); border: 1px solid rgba(255,255,255,0.2); color: var(--text); padding: 10px 0; font-size: 1.1rem; font-weight: bold; border-radius: 8px; cursor: pointer; text-align: center; }
     .num-btn:hover { background: var(--accent); color: #000; }
 
+    /* Overlays & Floating FX */
     .status-overlay { position: absolute; inset: 0; border-radius: 8px; display: none; align-items: center; justify-content: center; font-size: 1.4rem; font-weight: bold; backdrop-filter: blur(8px); z-index: 10; text-align: center; padding: 20px; }
     .overlay-frozen { background: rgba(56, 189, 248, 0.4); color: #fff; }
     .overlay-fog { background: rgba(0, 0, 0, 0.9); color: #fff; }
+
+    .floating-taunt { position: fixed; bottom: 20%; left: 50%; transform: translateX(-50%); font-size: 4.5rem; z-index: 200; animation: floatUp 2s forwards ease-out; pointer-events: none; }
+    @keyframes floatUp { 0% { opacity: 1; transform: translate(-50%, 0) scale(0.5); } 50% { transform: translate(-50%, -80px) scale(1.3); } 100% { opacity: 0; transform: translate(-50%, -150px) scale(1); } }
 
     .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 100; }
     .modal.active { display: flex; }
@@ -101,19 +124,26 @@
   <header>
     <h1>Sudoku Clash ⚔️</h1>
     <div class="stats-bar">
-      <span>🏆 <b id="elo-val">1000</b> ELO</span>
+      <button class="btn" style="padding: 2px 5px; font-size: 0.7rem;" onclick="toggleAudio()" id="audio-btn">🔊 ON</button>
+      <span id="rank-badge">🥉</span>
+      <span><b id="elo-val">1000</b> ELO</span>
       <span>⏱️ <b id="timer">00:00</b></span>
     </div>
   </header>
 
   <div class="lobby-card">
+    <div class="profile-row">
+      <button class="avatar-btn" onclick="cycleAvatar()" id="user-avatar">🥷</button>
+      <input type="text" id="username-input" value="Player1" style="flex:1;" onchange="saveProfile()">
+      <button class="btn btn-action" onclick="quickMatch()">Quick Match ⚡</button>
+    </div>
     <div class="lobby-row">
-      <button class="btn btn-action" style="flex:1" onclick="createRoom()">Create Room 🏠</button>
-      <input type="text" id="room-code-input" placeholder="ROOM CODE" maxlength="10">
+      <button class="btn" style="flex:1" onclick="createRoom()">Create Room 🏠</button>
+      <input type="text" id="room-code-input" placeholder="CODE" maxlength="6" style="width:80px; text-align:center;">
       <button class="btn" onclick="joinRoom()">Join 🔗</button>
     </div>
-    <div id="connection-status" style="font-size:0.8rem; text-align:center; color: var(--accent);">
-      Mode: Practice vs AI Bot (Create room for 1v1)
+    <div id="connection-status" style="font-size:0.75rem; text-align:center; color: var(--accent);">
+      Mode: Practice vs AI Bot
     </div>
   </div>
 
@@ -129,12 +159,13 @@
       <option value="medium" selected>Medium</option>
       <option value="hard">Hard</option>
     </select>
+    <button class="btn btn-pencil" id="pencil-btn" onclick="togglePencil()">✏️ Pencil: OFF</button>
     <button class="btn btn-action" onclick="startNewGame()">Reset 🔄</button>
   </div>
 
   <div class="battle-header">
     <div class="player-progress">
-      <div class="progress-label"><span>You</span><span id="you-pct">0%</span></div>
+      <div class="progress-label"><span id="you-label">You 🥷</span><span id="you-pct">0%</span></div>
       <div class="progress-track"><div id="you-bar" class="progress-fill fill-you"></div></div>
     </div>
     <div class="player-progress">
@@ -155,6 +186,14 @@
     <button class="power-btn" onclick="usePowerup('hint')" id="btn-hint">💡 Hint (2)</button>
   </div>
 
+  <div class="taunt-bar">
+    <button class="taunt-btn" onclick="sendTaunt('🔥')">🔥</button>
+    <button class="taunt-btn" onclick="sendTaunt('⚡')">⚡</button>
+    <button class="taunt-btn" onclick="sendTaunt('💩')">💩</button>
+    <button class="taunt-btn" onclick="sendTaunt('🤡')">🤡</button>
+    <button class="taunt-btn" onclick="sendTaunt('💀')">💀</button>
+  </div>
+
   <div class="numpad">
     <button class="num-btn" onclick="inputNumber(1)">1</button>
     <button class="num-btn" onclick="inputNumber(2)">2</button>
@@ -171,14 +210,17 @@
   <div class="modal" id="game-modal">
     <div class="modal-content">
       <h2 id="modal-title">VICTORY!</h2>
-      <p id="modal-desc">You crushed the game!</p>
-      <button class="btn btn-action" style="width:100%; margin-top:15px;" onclick="closeModal(); startNewGame();">Next Match 🚀</button>
+      <p id="modal-desc">You crushed the match!</p>
+      <button class="btn btn-action" style="width:100%; margin-top:10px;" onclick="requestRematch()">Rematch ⚔️</button>
+      <button class="btn" style="width:100%; margin-top:6px;" onclick="closeModal(); startNewGame();">Next Match 🚀</button>
     </div>
   </div>
 
   <script>
+    let soundMuted = false;
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function playTone(freq, duration, type = 'sine') {
+      if (soundMuted) return;
       try {
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
@@ -193,6 +235,11 @@
       } catch (e) {}
     }
 
+    function toggleAudio() {
+      soundMuted = !soundMuted;
+      document.getElementById('audio-btn').innerText = soundMuted ? '🔇 OFF' : '🔊 ON';
+    }
+
     const SFX = {
       click: () => playTone(440, 0.08),
       error: () => playTone(140, 0.25, 'sawtooth'),
@@ -200,18 +247,62 @@
       win: () => { [523, 659, 783, 1046].forEach((f, i) => setTimeout(() => playTone(f, 0.18), i * 100)); }
     };
 
-    let solution = [], board = [], userBoard = [];
+    // Profile & Avatars
+    const avatars = ['🥷', '👑', '🦊', '🤖', '🐉'];
+    let currentAvatarIdx = 0;
+    let username = localStorage.getItem('sudoku_username') || ('Player_' + Math.floor(100 + Math.random()*900));
+
+    function loadProfile() {
+      document.getElementById('username-input').value = username;
+      currentAvatarIdx = parseInt(localStorage.getItem('sudoku_avatar_idx') || '0');
+      document.getElementById('user-avatar').innerText = avatars[currentAvatarIdx];
+      updateLabels();
+    }
+
+    function cycleAvatar() {
+      currentAvatarIdx = (currentAvatarIdx + 1) % avatars.length;
+      document.getElementById('user-avatar').innerText = avatars[currentAvatarIdx];
+      localStorage.setItem('sudoku_avatar_idx', currentAvatarIdx);
+      updateLabels();
+    }
+
+    function saveProfile() {
+      username = document.getElementById('username-input').value.trim() || 'Player1';
+      localStorage.setItem('sudoku_username', username);
+      updateLabels();
+    }
+
+    function updateLabels() {
+      document.getElementById('you-label').innerText = `${username} ${avatars[currentAvatarIdx]}`;
+    }
+
+    // State
+    let solution = [], board = [], userBoard = [], candidates = Array.from({length: 81}, () => new Set());
     let selectedCell = null, timerInterval = null, secondsElapsed = 0;
     let powerups = { freeze: 1, fog: 1, hint: 2 };
-    let isFrozen = false, oppProgress = 0, botInterval = null;
+    let isFrozen = false, pencilMode = false, oppProgress = 0, botInterval = null;
     let elo = parseInt(localStorage.getItem('sudoku_elo') || '1000');
 
     let peer = null, conn = null, isHost = false, isOnline = false;
 
-    document.getElementById('elo-val').innerText = elo;
+    function updateRankBadge() {
+      document.getElementById('elo-val').innerText = elo;
+      const badge = document.getElementById('rank-badge');
+      if (elo >= 1400) badge.innerText = '💎';
+      else if (elo >= 1200) badge.innerText = '🥇';
+      else if (elo >= 1000) badge.innerText = '🥈';
+      else badge.innerText = '🥉';
+    }
 
     function changeTheme(themeName) {
       document.documentElement.setAttribute('data-theme', themeName);
+    }
+
+    function togglePencil() {
+      pencilMode = !pencilMode;
+      const btn = document.getElementById('pencil-btn');
+      btn.innerText = pencilMode ? '✏️ Pencil: ON' : '✏️ Pencil: OFF';
+      btn.classList.toggle('active', pencilMode);
     }
 
     function generateSudoku(diff) {
@@ -226,6 +317,7 @@
         if (board[idx] !== 0) { board[idx] = 0; removed++; }
       }
       userBoard = [...board];
+      candidates = Array.from({length: 81}, () => new Set());
     }
 
     function solveSudoku(b) {
@@ -256,43 +348,46 @@
       return true;
     }
 
-    // Fixed WebRTC Direct Networking
-    function createRoom() {
+    // WebRTC Matchmaking
+    function quickMatch() {
+      document.getElementById('connection-status').innerText = "⚡ Searching for opponent...";
+      createRoom("MATCH");
+    }
+
+    function createRoom(customPrefix = "SUDO") {
       isHost = true;
       const rawCode = Math.random().toString(36).substring(2, 6).toUpperCase();
-      const code = 'SUDO-' + rawCode;
+      const code = `${customPrefix}-${rawCode}`;
       
       peer = new Peer(code);
       
       peer.on('open', (id) => {
-        const shortCode = id.replace('SUDO-', '');
+        const shortCode = id.replace(`${customPrefix}-`, '');
         document.getElementById('room-code-input').value = shortCode;
         navigator.clipboard.writeText(shortCode);
-        document.getElementById('connection-status').innerText = `🏠 Room Code: ${shortCode} (Copied to Clipboard!)`;
+        document.getElementById('connection-status').innerText = `🏠 Code: ${shortCode} (Copied to Clipboard!)`;
       });
 
       peer.on('connection', (c) => {
         conn = c;
         c.on('open', () => {
           isOnline = true;
+          oppProgress = 0;
+          resetOpponentProgressUI();
           if (botInterval) clearInterval(botInterval);
-          document.getElementById('connection-status').innerText = "🟢 Real Player Connected! Game Synced!";
+          document.getElementById('connection-status').innerText = "🟢 Real Player Connected!";
           document.getElementById('opp-label').innerText = "Real Opponent 👤";
           setupConnection();
           syncBoardToPeer();
         });
       });
-
-      peer.on('error', (err) => {
-        document.getElementById('connection-status').innerText = "⚠️ Room error. Retrying...";
-      });
     }
 
     function joinRoom() {
       let inputVal = document.getElementById('room-code-input').value.trim().toUpperCase();
-      if (!inputVal) return alert("Please enter a 4-letter Room Code!");
+      if (!inputVal) return alert("Enter Room Code!");
       
-      const fullCode = inputVal.startsWith('SUDO-') ? inputVal : 'SUDO-' + inputVal;
+      const fullCode = inputVal.includes('-') ? inputVal : 'SUDO-' + inputVal;
       peer = new Peer();
 
       peer.on('open', () => {
@@ -300,12 +395,19 @@
         conn.on('open', () => {
           isHost = false;
           isOnline = true;
+          oppProgress = 0;
+          resetOpponentProgressUI();
           if (botInterval) clearInterval(botInterval);
-          document.getElementById('connection-status').innerText = "🟢 Connected to Room Host!";
+          document.getElementById('connection-status').innerText = "🟢 Connected to Host!";
           document.getElementById('opp-label').innerText = "Host Opponent 👤";
           setupConnection();
         });
       });
+    }
+
+    function resetOpponentProgressUI() {
+      document.getElementById('opp-bar').style.width = '0%';
+      document.getElementById('opp-pct').innerText = '0%';
     }
 
     function setupConnection() {
@@ -317,6 +419,11 @@
           if (oppProgress >= 100) triggerGameOver(false);
         } else if (data.type === 'attack') {
           receiveAttack(data.attack);
+        } else if (data.type === 'taunt') {
+          displayFloatingTaunt(data.emoji);
+        } else if (data.type === 'rematch') {
+          closeModal();
+          if (isHost) startNewGame();
         } else if (data.type === 'sync') {
           solution = data.solution;
           board = data.board;
@@ -332,6 +439,31 @@
       }
     }
 
+    function sendTaunt(emoji) {
+      displayFloatingTaunt(emoji);
+      if (conn && conn.open) conn.send({ type: 'taunt', emoji });
+    }
+
+    function displayFloatingTaunt(emoji) {
+      SFX.click();
+      const el = document.createElement('div');
+      el.className = 'floating-taunt';
+      el.innerText = emoji;
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 2000);
+    }
+
+    function requestRematch() {
+      if (conn && conn.open) {
+        conn.send({ type: 'rematch' });
+        closeModal();
+        if (isHost) startNewGame();
+      } else {
+        closeModal();
+        startNewGame();
+      }
+    }
+
     function renderBoard() {
       const grid = document.getElementById('grid');
       grid.innerHTML = '';
@@ -344,6 +476,16 @@
         } else if (userBoard[i] !== 0) {
           cell.innerText = userBoard[i];
           cell.classList.add('user-entered');
+        } else if (candidates[i].size > 0) {
+          const pGrid = document.createElement('div');
+          pGrid.className = 'pencil-grid';
+          for (let n = 1; n <= 9; n++) {
+            const pNum = document.createElement('div');
+            pNum.className = 'pencil-num';
+            pNum.innerText = candidates[i].has(n) ? n : '';
+            pGrid.appendChild(pNum);
+          }
+          cell.appendChild(pGrid);
         }
         cell.onclick = () => selectCell(i);
         grid.appendChild(cell);
@@ -374,12 +516,19 @@
 
     function inputNumber(num) {
       if (selectedCell === null || board[selectedCell] !== 0 || isFrozen) return;
-      if (num === 0) {
-        userBoard[selectedCell] = 0;
+
+      if (pencilMode && num !== 0) {
+        if (candidates[selectedCell].has(num)) candidates[selectedCell].delete(num);
+        else candidates[selectedCell].add(num);
       } else {
-        if (num === solution[selectedCell]) SFX.click();
-        else SFX.error();
-        userBoard[selectedCell] = num;
+        candidates[selectedCell].clear();
+        if (num === 0) {
+          userBoard[selectedCell] = 0;
+        } else {
+          if (num === solution[selectedCell]) SFX.click();
+          else SFX.error();
+          userBoard[selectedCell] = num;
+        }
       }
       renderBoard();
       checkWinCondition();
@@ -405,6 +554,7 @@
 
       if (type === 'hint' && selectedCell !== null && board[selectedCell] === 0) {
         userBoard[selectedCell] = solution[selectedCell];
+        candidates[selectedCell].clear();
         renderBoard();
       } else if (conn && conn.open) {
         conn.send({ type: 'attack', attack: type });
@@ -459,7 +609,7 @@
         launchConfetti();
         elo += 25;
         title.innerText = "VICTORY! 🏆";
-        desc.innerText = `Matched finished in ${secondsElapsed}s. +25 ELO!`;
+        desc.innerText = `Finished in ${secondsElapsed}s! +25 ELO`;
       } else {
         SFX.error();
         elo = Math.max(800, elo - 15);
@@ -469,7 +619,7 @@
       }
 
       localStorage.setItem('sudoku_elo', elo);
-      document.getElementById('elo-val').innerText = elo;
+      updateRankBadge();
       modal.classList.add('active');
     }
 
@@ -523,7 +673,11 @@
       render();
     }
 
-    window.onload = startNewGame;
+    window.onload = () => {
+      loadProfile();
+      updateRankBadge();
+      startNewGame();
+    };
   </script>
 </body>
 </html>

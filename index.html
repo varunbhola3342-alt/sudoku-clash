@@ -13,6 +13,11 @@
 
   <!-- PeerJS Direct WebRTC -->
   <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+
+  <!-- Firebase Cloud SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+
   <style>
     :root {
       --bg: #0f172a;
@@ -247,6 +252,24 @@
   </div>
 
   <script>
+    // Firebase Cloud Database Initialization
+    const firebaseConfig = {
+      databaseURL: "https://sudoku-clash-arena-default-rtdb.firebaseio.com"
+    };
+    let db = null;
+    try {
+      if (window.firebase) {
+        firebase.initializeApp(firebaseConfig);
+        db = firebase.database();
+      }
+    } catch(e) { console.log("Cloud Database Offline Mode"); }
+
+    let uid = localStorage.getItem('sudoku_uid');
+    if (!uid) {
+      uid = 'usr_' + Math.random().toString(36).substring(2, 9);
+      localStorage.setItem('sudoku_uid', uid);
+    }
+
     let soundMuted = false;
     let bgmMuted = true;
     let bgmInterval = null;
@@ -345,18 +368,33 @@
       document.getElementById('user-avatar').innerText = avail[currentAvatarIdx];
       localStorage.setItem('sudoku_avatar_idx', currentAvatarIdx);
       updateLabels();
+      saveToCloudLeaderboard();
     }
 
     function saveProfile() {
       username = document.getElementById('username-input').value.trim() || 'Player1';
       localStorage.setItem('sudoku_username', username);
       updateLabels();
+      saveToCloudLeaderboard();
     }
 
     function updateLabels() {
       const avail = getAvailableAvatars();
       const currentAvatar = avail[currentAvatarIdx] || '🥷';
       document.getElementById('you-label').innerText = `${username} ${currentAvatar}`;
+    }
+
+    function saveToCloudLeaderboard() {
+      const avail = getAvailableAvatars();
+      const currentAvatar = avail[currentAvatarIdx] || '🥷';
+      if (db) {
+        db.ref('leaderboard/' + uid).set({
+          name: username,
+          elo: elo,
+          avatar: currentAvatar,
+          updatedAt: Date.now()
+        });
+      }
     }
 
     // State & Board logic
@@ -720,6 +758,7 @@
       localStorage.setItem('sudoku_streak', streak);
       loadProfile();
       updateRankBadge();
+      saveToCloudLeaderboard();
       modal.classList.add('active');
     }
 
@@ -730,12 +769,47 @@
     function openLeaderboard() {
       const modal = document.getElementById('leaderboard-modal');
       const tbody = document.getElementById('leader-body');
-      
+      tbody.innerHTML = '<tr><td colspan="3">Syncing Cloud Rankings...</td></tr>';
+      modal.classList.add('active');
+
+      if (db) {
+        db.ref('leaderboard').once('value', (snapshot) => {
+          let list = [];
+          snapshot.forEach((child) => {
+            list.push(child.val());
+          });
+          list.sort((a,b) => b.elo - a.elo);
+          renderLeaderboardRows(list.slice(0, 10));
+        }).catch(() => renderFallbackLeaderboard());
+      } else {
+        renderFallbackLeaderboard();
+      }
+    }
+
+    function renderLeaderboardRows(list) {
+      const tbody = document.getElementById('leader-body');
+      if (!list || list.length === 0) {
+        renderFallbackLeaderboard();
+        return;
+      }
+      tbody.innerHTML = list.map((player, idx) => `
+        <tr>
+          <td>#${idx + 1}</td>
+          <td>${player.name || 'Player'} ${player.avatar || '🥷'}</td>
+          <td><b>${player.elo}</b></td>
+        </tr>
+      `).join('');
+    }
+
+    function renderFallbackLeaderboard() {
+      const tbody = document.getElementById('leader-body');
+      const avail = getAvailableAvatars();
+      const currentAvatar = avail[currentAvatarIdx] || '🥷';
       const mockLeaders = [
-        { rank: 1, name: "CyberKing 👑", elo: 1650 },
-        { rank: 2, name: "GridMaster ⚡", elo: 1520 },
-        { rank: 3, name: "SudokuNinja 🥷", elo: 1440 },
-        { rank: 4, name: `${username} (You)`, elo: elo }
+        { name: "CyberKing 👑", elo: 1650 },
+        { name: "GridMaster ⚡", elo: 1520 },
+        { name: "SudokuNinja 🥷", elo: 1440 },
+        { name: `${username} ${currentAvatar}`, elo: elo }
       ].sort((a,b) => b.elo - a.elo);
 
       tbody.innerHTML = mockLeaders.map((player, idx) => `
@@ -745,8 +819,6 @@
           <td><b>${player.elo}</b></td>
         </tr>
       `).join('');
-
-      modal.classList.add('active');
     }
 
     function closeLeaderboard() {
@@ -807,6 +879,7 @@
     window.onload = () => {
       loadProfile();
       updateRankBadge();
+      saveToCloudLeaderboard();
       startNewGame();
     };
   </script>

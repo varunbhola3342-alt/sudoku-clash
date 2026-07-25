@@ -18,6 +18,9 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 
+  <!-- CrazyGames v2 SDK -->
+  <script src="https://sdk.crazygames.com/crazygames-sdk-v2.js"></script>
+
   <style>
     :root {
       --bg: #0f172a;
@@ -59,7 +62,6 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; user-select: none; touch-action: manipulation; }
     body { background-color: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 10px; transition: background 0.3s, color 0.3s; overflow-x: hidden; }
 
-    /* Screen Shake FX */
     .shake { animation: shakeAnim 0.35s cubic-bezier(.36,.07,.19,.97) both; }
     @keyframes shakeAnim {
       10%, 90% { transform: translate3d(-2px, 0, 0); }
@@ -98,7 +100,6 @@
     .btn-pencil.active { background: var(--accent-success); color: #000; border: none; }
     .btn-blitz { background: #eab308; color: #000; border: none; }
 
-    /* Crisp Sudoku Board with Clear 3x3 Sub-Grid Borders */
     .board-container { position: relative; width: 100%; max-width: 500px; aspect-ratio: 1; margin-bottom: 8px; }
     .grid { 
       display: grid; 
@@ -125,7 +126,6 @@
       border: 1px solid rgba(255,255,255,0.08);
     }
 
-    /* Distinct 3x3 Sub-Grid Block Borders */
     .cell:nth-child(3n):not(:nth-child(9n)) { 
       border-right: 3px solid var(--grid-border) !important; 
     }
@@ -317,6 +317,15 @@
   </div>
 
   <script>
+    // Initialize CrazyGames SDK v2
+    let crazyGamesSDK = null;
+    window.addEventListener('DOMContentLoaded', () => {
+      if (window.CrazyGames && window.CrazyGames.SDK) {
+        crazyGamesSDK = window.CrazyGames.SDK;
+        crazyGamesSDK.init();
+      }
+    });
+
     // Firebase Cloud Database Initialization
     const firebaseConfig = {
       databaseURL: "https://sudoku-clash-arena-default-rtdb.firebaseio.com"
@@ -344,17 +353,58 @@
       localStorage.setItem('sudoku_coins', coins);
     }
 
+    function showToast(msg) {
+      const el = document.createElement('div');
+      el.style.position = 'fixed';
+      el.style.top = '15%';
+      el.style.left = '50%';
+      el.style.transform = 'translateX(-50%)';
+      el.style.background = 'var(--card)';
+      el.style.border = '1px solid var(--accent)';
+      el.style.color = '#fff';
+      el.style.padding = '10px 18px';
+      el.style.borderRadius = '12px';
+      el.style.fontWeight = 'bold';
+      el.style.fontSize = '0.85rem';
+      el.style.zIndex = '300';
+      el.style.boxShadow = '0 4px 20px rgba(0,0,0,0.5)';
+      el.innerText = msg;
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 2500);
+    }
+
+    // Rewarded Video Ad with CrazyGames SDK + Dev Fallback
     function claimFreeCoins() {
-      coins += 500;
-      updateCoinUI();
-      SFX.powerup();
-      alert("🎉 Rewarded Video Watched! +500 Coins added to your balance!");
+      if (crazyGamesSDK && crazyGamesSDK.ad) {
+        crazyGamesSDK.ad.requestAd('rewarded', {
+          adStarted: () => {
+            if (bgmInterval) clearInterval(bgmInterval);
+          },
+          adFinished: () => {
+            coins += 500;
+            updateCoinUI();
+            SFX.powerup();
+            showToast("🎉 Rewarded Ad Watched! +500 Coins added!");
+          },
+          adError: (error) => {
+            coins += 500;
+            updateCoinUI();
+            SFX.powerup();
+            showToast("🎉 +500 Coins added!");
+          }
+        });
+      } else {
+        coins += 500;
+        updateCoinUI();
+        SFX.powerup();
+        showToast("🎉 +500 Free Coins claimed!");
+      }
     }
 
     function deductWager() {
       const wagerVal = parseInt(document.getElementById('wager-select').value || '100');
       if (coins < wagerVal) {
-        alert("⚠️ Not enough coins for this bet! Click '📺 +500' to claim free coins.");
+        showToast("⚠️ Not enough coins! Click '📺 +500' for free coins.");
         return false;
       }
       currentWager = wagerVal;
@@ -399,7 +449,6 @@
       } catch (e) {}
     }
 
-    // 8-Bit Procedural BGM Generator
     const bgmNotes = [164.81, 196.00, 220.00, 246.94, 261.63, 220.00, 196.00, 164.81];
     let noteStep = 0;
 
@@ -446,7 +495,6 @@
       win: () => { [523, 659, 783, 1046].forEach((f, i) => setTimeout(() => playTone(f, 0.18), i * 100)); }
     };
 
-    // Profiles & Unlockable Avatars
     const baseAvatars = ['🥷', '👑', '🦊', '🤖', '🐉'];
     const streakAvatars = ['🦁', '⚡', '👽'];
     let streak = parseInt(localStorage.getItem('sudoku_streak') || '0');
@@ -507,7 +555,6 @@
       }
     }
 
-    // Social Results Card Sharing
     function shareResults() {
       const avail = getAvailableAvatars();
       const currentAvatar = avail[currentAvatarIdx] || '🥷';
@@ -527,7 +574,6 @@
       }
     }
 
-    // Co-op Boss Raid Mode System Logic
     let bossMode = false;
     let bossHP = 1000;
     let bossMaxHP = 1000;
@@ -580,7 +626,6 @@
       }
     }
 
-    // Tournament Bracket System Logic
     let tourneyActive = false;
     let tourneyRound = 0;
     let tourneyBracket = [];
@@ -677,7 +722,7 @@
           localStorage.setItem('sudoku_elo', elo);
           updateRankBadge();
           saveToCloudLeaderboard();
-          alert("🎉 TOURNAMENT CHAMPION! Bonus +100 ELO & +1000 Coins Awarded!");
+          showToast("🎉 TOURNAMENT CHAMPION! +100 ELO & +1000 Coins!");
           tourneyActive = false;
         }
       } else {
@@ -685,7 +730,6 @@
       }
     }
 
-    // State & Board logic
     let solution = [], board = [], userBoard = [], candidates = Array.from({length: 81}, () => new Set());
     let selectedCell = null, timerInterval = null, secondsElapsed = 0;
     let powerups = { freeze: 1, fog: 1, hint: 2 };
@@ -815,7 +859,7 @@
       bossMode = false;
       document.getElementById('opp-bar').className = "progress-fill fill-opp";
       let inputVal = document.getElementById('room-code-input').value.trim().toUpperCase();
-      if (!inputVal) return alert("Enter Room Code!");
+      if (!inputVal) return showToast("Enter Room Code!");
       
       const fullCode = inputVal.includes('-') ? inputVal : 'SUDO-' + inputVal;
       peer = new Peer();

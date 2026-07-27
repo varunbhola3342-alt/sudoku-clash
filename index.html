@@ -3,19 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Sudoku Clash 1v1 | Esports Arena</title>
+  <title>Sudoku Clash 1v1 | Real Money Arena</title>
   
-  <!-- Open Graph Meta Tags (Social Media Previews for Netlify) -->
-  <meta property="og:title" content="Sudoku Clash 1v1 | Esports Arena">
-  <meta property="og:description" content="Challenge players worldwide in real-time Sudoku grid battles, Boss Raids, and 8-Player Tournaments!">
+  <!-- Open Graph Meta Tags -->
+  <meta property="og:title" content="Sudoku Clash 1v1 | Real Money Arena">
+  <meta property="og:description" content="Compete in real-time 1v1 Sudoku cash battles for $10, $25, $50, $100, $150, $200, and $500 stakes!">
   <meta property="og:type" content="website">
-  <meta property="og:image" content="https://sudoku-clash.netlify.app/preview.png">
 
   <!-- Mobile PWA Support -->
   <meta name="theme-color" content="#0f172a">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="manifest" href="data:application/manifest+json,{%22name%22:%22Sudoku%20Clash%201v1%22,%22short_name%22:%22SudokuClash%22,%22start_url%22:%22/%22,%22display%22:%22standalone%22,%22background_color%22:%22%230f172a%22,%22theme_color%22:%22%230f172a%22}">
 
   <!-- PeerJS Direct WebRTC -->
   <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
@@ -81,10 +79,12 @@
 
     .stats-bar { display: flex; gap: 4px; font-size: 0.72rem; background: var(--card); padding: 4px 8px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); align-items: center; }
 
-    .lobby-card { width: 100%; max-width: 500px; background: var(--card); border-radius: 12px; padding: 10px; margin-bottom: 8px; border: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; gap: 6px; }
+    .lobby-card { width: 100%; max-width: 500px; background: var(--card); border-radius: 12px; padding: 10px; margin-bottom: 8px; border: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; gap: 8px; }
     .profile-row { display: flex; gap: 6px; align-items: center; }
     .avatar-btn { background: var(--bg); border: 1px solid rgba(255,255,255,0.2); font-size: 1.2rem; padding: 4px 8px; border-radius: 8px; cursor: pointer; }
     input[type="text"] { background: var(--bg); border: 1px solid rgba(255,255,255,0.2); color: var(--text); padding: 6px 8px; border-radius: 8px; font-weight: bold; font-size: 0.85rem; }
+
+    .mode-btn-group { display: flex; gap: 6px; width: 100%; }
 
     .lobby-row { display: flex; gap: 6px; }
 
@@ -94,14 +94,13 @@
     .progress-fill { height: 100%; width: 0%; transition: width 0.3s ease; }
     .fill-you { background: var(--accent); }
     .fill-opp { background: var(--accent-danger); }
-    .fill-boss { background: #dc2626; }
 
     .controls-top { display: flex; gap: 4px; width: 100%; max-width: 500px; margin-bottom: 8px; flex-wrap: wrap; }
     select, .btn { background: var(--card); border: 1px solid rgba(255,255,255,0.2); color: var(--text); padding: 6px 8px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.78rem; transition: all 0.2s; flex: 1; min-width: 60px; text-align: center; }
     .btn-action { background: var(--accent); color: #000; border: none; }
     .btn-action:hover { opacity: 0.9; }
-    .btn-tourney { background: #a855f7; color: #fff; border: none; }
-    .btn-boss { background: #dc2626; color: #fff; border: none; }
+    .btn-free { background: #10b981; color: #000; border: none; }
+    .btn-cash { background: #eab308; color: #000; border: none; font-weight: 800; }
     .btn-share { background: #10b981; color: #000; border: none; }
     .btn-pencil.active { background: var(--accent-success); color: #000; border: none; }
     .btn-blitz { background: #eab308; color: #000; border: none; }
@@ -165,24 +164,15 @@
 
     .floating-taunt { position: fixed; bottom: 20%; left: 50%; transform: translateX(-50%); font-size: 4.5rem; z-index: 200; animation: floatUp 2s forwards ease-out; pointer-events: none; }
     
-    .floating-damage { position: absolute; font-weight: 900; font-size: 1.4rem; color: #f43f5e; pointer-events: none; z-index: 50; animation: floatDamage 1s forwards ease-out; text-shadow: 0 0 8px rgba(0,0,0,0.8); }
-    @keyframes floatDamage { 0% { opacity: 1; transform: translateY(0) scale(0.8); } 50% { transform: translateY(-30px) scale(1.3); } 100% { opacity: 0; transform: translateY(-60px) scale(1); } }
-
     @keyframes floatUp { 0% { opacity: 1; transform: translate(-50%, 0) scale(0.5); } 50% { transform: translate(-50%, -80px) scale(1.3); } 100% { opacity: 0; transform: translate(-50%, -150px) scale(1); } }
 
     .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; z-index: 100; }
     .modal.active { display: flex; }
-    .modal-content { background: var(--card); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2); text-align: center; max-width: 360px; width: 92%; }
+    .modal-content { background: var(--card); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2); text-align: center; max-width: 420px; width: 92%; }
 
-    .leader-table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.85rem; }
-    .leader-table th, .leader-table td { padding: 6px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .leader-table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.8rem; }
+    .leader-table th, .leader-table td { padding: 6px 4px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
     .leader-table th { color: var(--accent); }
-
-    .bracket-container { display: flex; flex-direction: column; gap: 8px; margin: 12px 0; font-size: 0.75rem; text-align: left; }
-    .bracket-round-title { font-weight: bold; color: var(--accent); text-transform: uppercase; font-size: 0.7rem; margin-top: 4px; }
-    .bracket-match { background: var(--bg); padding: 6px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; }
-    .bracket-match.active-match { border-color: var(--accent); background: rgba(56, 189, 248, 0.15); }
-    .bracket-winner { color: var(--accent-success); font-weight: bold; }
 
     canvas#confetti { position: fixed; inset: 0; pointer-events: none; z-index: 99; }
   </style>
@@ -194,13 +184,11 @@
   <header>
     <h1>Sudoku Clash ⚔️</h1>
     <div class="stats-bar">
-      <span>🪙 <b id="coin-val" style="color: #eab308;">1000</b></span>
-      <button class="btn" style="padding: 2px 5px; font-size: 0.65rem; background: #eab308; color: #000;" onclick="claimFreeCoins()">📺 +500</button>
-      <button class="btn" style="padding: 2px 5px; font-size: 0.65rem;" onclick="openLeaderboard()">🏆 Ranks</button>
+      <span>💵 <b id="cash-val" style="color: #10b981;">$100.00</b></span>
+      <button class="btn" style="padding: 2px 6px; font-size: 0.65rem; background: #10b981; color: #000;" onclick="addDeposit()">💳 + Add Cash</button>
+      <button class="btn" style="padding: 2px 6px; font-size: 0.65rem;" onclick="openLeaderboard()">🏆 Leaderboard</button>
       <button class="btn" style="padding: 2px 5px; font-size: 0.65rem;" onclick="toggleBGM()" id="bgm-btn">🎵 BGM</button>
       <button class="btn" style="padding: 2px 5px; font-size: 0.65rem;" onclick="toggleAudio()" id="audio-btn">🔊 SFX</button>
-      <span id="rank-badge">🥉</span>
-      <span><b id="elo-val">1000</b></span>
       <span>⏱️ <b id="timer">00:00</b></span>
     </div>
   </header>
@@ -209,22 +197,31 @@
     <div class="profile-row">
       <button class="avatar-btn" onclick="cycleAvatar()" id="user-avatar">🥷</button>
       <input type="text" id="username-input" value="Player1" style="flex:1;" onchange="saveProfile()">
-      <button class="btn btn-action" onclick="quickMatch()">Quick ⚡</button>
-      <button class="btn btn-tourney" onclick="startTournament()">🥊 Tourney</button>
-      <button class="btn btn-boss" onclick="startBossRaid()">👾 Boss</button>
+      <span style="font-size:0.8rem; font-weight:bold; color:var(--accent);">Lvl <b id="user-level-display">1</b></span>
     </div>
+
+    <!-- GAME MODE SELECTOR -->
+    <div class="mode-btn-group">
+      <button class="btn btn-free" onclick="startFreePractice()">🧩 Free Match (No BOT)</button>
+      <button class="btn btn-cash" onclick="startRealMoneyMatch()">💵 1v1 Real Money Match</button>
+    </div>
+
     <div class="lobby-row">
       <select id="wager-select" style="flex: 1.2;">
-        <option value="100">💰 Bet 100 Coins</option>
-        <option value="250">💰 Bet 250 Coins</option>
-        <option value="500">💰 Bet 500 Coins</option>
+        <option value="10">💵 $10 Entry (Win $20)</option>
+        <option value="25">💵 $25 Entry (Win $50)</option>
+        <option value="50">💵 $50 Entry (Win $100)</option>
+        <option value="100" selected>💵 $100 Entry (Win $200)</option>
+        <option value="150">💵 $150 Entry (Win $300)</option>
+        <option value="200">💵 $200 Entry (Win $400)</option>
+        <option value="500">💵 $500 Entry (Win $1000)</option>
       </select>
       <button class="btn" style="flex:1" onclick="createRoom()">Create Room 🏠</button>
       <input type="text" id="room-code-input" placeholder="CODE" maxlength="6" style="width:70px; text-align:center;">
       <button class="btn" onclick="joinRoom()">Join 🔗</button>
     </div>
     <div id="connection-status" style="font-size:0.75rem; text-align:center; color: var(--accent);">
-      Mode: Practice vs AI Bot
+      Mode: Free Practice (Solo / No BOT)
     </div>
   </div>
 
@@ -240,18 +237,18 @@
       <option value="medium" selected>Medium</option>
       <option value="hard">Hard</option>
     </select>
-    <button class="btn btn-blitz" onclick="startDailyBlitz()">📅 Blitz</button>
+    <button class="btn btn-blitz" onclick="startDailyBlitz()">📅 Daily Blitz</button>
     <button class="btn btn-pencil" id="pencil-btn" onclick="togglePencil()">✏️ Pencil</button>
     <button class="btn btn-action" onclick="startNewGame()">Reset 🔄</button>
   </div>
 
-  <div class="battle-header">
+  <div class="battle-header" id="battle-header">
     <div class="player-progress" id="you-progress-panel">
       <div class="progress-label"><span id="you-label">You 🥷</span><span id="you-pct">0%</span></div>
       <div class="progress-track"><div id="you-bar" class="progress-fill fill-you"></div></div>
     </div>
-    <div class="player-progress" id="opp-progress-panel">
-      <div class="progress-label"><span id="opp-label">Opponent Bot 🤖</span><span id="opp-pct">0%</span></div>
+    <div class="player-progress" id="opp-progress-panel" style="display:none;">
+      <div class="progress-label"><span id="opp-label">Opponent 👤</span><span id="opp-pct">0%</span></div>
       <div class="progress-track"><div id="opp-bar" class="progress-fill fill-opp"></div></div>
     </div>
   </div>
@@ -295,30 +292,21 @@
       <h2 id="modal-title">VICTORY!</h2>
       <p id="modal-desc">You crushed the match!</p>
       <button class="btn btn-share" style="width:100%; margin-top:10px;" id="share-btn" onclick="shareResults()">Share Victory 📲</button>
-      <button class="btn btn-action" id="modal-next-btn" style="width:100%; margin-top:6px;" onclick="closeModal(); startNextMatch();">Next Match 🚀</button>
+      <button class="btn btn-action" id="modal-next-btn" style="width:100%; margin-top:6px;" onclick="closeModal(); startNextMatch();">Play Next Level 🚀</button>
     </div>
   </div>
 
   <!-- Leaderboard Modal -->
   <div class="modal" id="leaderboard-modal">
     <div class="modal-content">
-      <h2>🏆 Global Leaderboard</h2>
+      <h2>🏆 Global Level Leaderboard</h2>
       <table class="leader-table">
         <thead>
-          <tr><th>Rank</th><th>Player</th><th>ELO</th></tr>
+          <tr><th>Rank</th><th>Player</th><th>Level</th><th>Best Time</th><th>Score</th></tr>
         </thead>
         <tbody id="leader-body"></tbody>
       </table>
       <button class="btn btn-action" style="width:100%; margin-top:8px;" onclick="closeLeaderboard()">Close</button>
-    </div>
-  </div>
-
-  <!-- Tournament Bracket Modal -->
-  <div class="modal" id="tourney-modal">
-    <div class="modal-content">
-      <h2>🥊 8-Player Tournament</h2>
-      <div class="bracket-container" id="bracket-display"></div>
-      <button class="btn btn-action" style="width:100%; margin-top:10px;" id="tourney-play-btn" onclick="launchTourneyMatch()">Play Next Round ⚔️</button>
     </div>
   </div>
 
@@ -350,13 +338,28 @@
       localStorage.setItem('sudoku_uid', uid);
     }
 
-    // Virtual Coin Economy State
-    let coins = parseInt(localStorage.getItem('sudoku_coins') || '1000');
-    let currentWager = 100;
+    // Real Money Cash Wallet & Progression State
+    let cashBalance = parseFloat(localStorage.getItem('sudoku_cash') || '100.00');
+    let userLevel = parseInt(localStorage.getItem('sudoku_level') || '1');
+    let bestTimeSeconds = parseInt(localStorage.getItem('sudoku_best_time') || '9999');
+    let highScore = parseInt(localStorage.getItem('sudoku_high_score') || '0');
+    let currentWager = 0;
+    let isFreePracticeMode = true;
 
-    function updateCoinUI() {
-      document.getElementById('coin-val').innerText = coins;
-      localStorage.setItem('sudoku_coins', coins);
+    function updateWalletUI() {
+      document.getElementById('cash-val').innerText = `$${cashBalance.toFixed(2)}`;
+      document.getElementById('user-level-display').innerText = userLevel;
+      localStorage.setItem('sudoku_cash', cashBalance.toFixed(2));
+      localStorage.setItem('sudoku_level', userLevel);
+      localStorage.setItem('sudoku_best_time', bestTimeSeconds);
+      localStorage.setItem('sudoku_high_score', highScore);
+    }
+
+    function addDeposit() {
+      cashBalance += 50.00;
+      updateWalletUI();
+      SFX.powerup();
+      showToast("💳 $50.00 Added to Cash Wallet!");
     }
 
     function showToast(msg) {
@@ -379,43 +382,15 @@
       setTimeout(() => el.remove(), 2500);
     }
 
-    // Rewarded Video Ad with CrazyGames SDK + Dev Fallback
-    function claimFreeCoins() {
-      if (crazyGamesSDK && crazyGamesSDK.ad) {
-        crazyGamesSDK.ad.requestAd('rewarded', {
-          adStarted: () => {
-            if (bgmInterval) clearInterval(bgmInterval);
-          },
-          adFinished: () => {
-            coins += 500;
-            updateCoinUI();
-            SFX.powerup();
-            showToast("🎉 Rewarded Ad Watched! +500 Coins added!");
-          },
-          adError: (error) => {
-            coins += 500;
-            updateCoinUI();
-            SFX.powerup();
-            showToast("🎉 +500 Coins added!");
-          }
-        });
-      } else {
-        coins += 500;
-        updateCoinUI();
-        SFX.powerup();
-        showToast("🎉 +500 Free Coins claimed!");
-      }
-    }
-
     function deductWager() {
-      const wagerVal = parseInt(document.getElementById('wager-select').value || '100');
-      if (coins < wagerVal) {
-        showToast("⚠️ Not enough coins! Click '📺 +500' for free coins.");
+      const wagerVal = parseFloat(document.getElementById('wager-select').value || '10');
+      if (cashBalance < wagerVal) {
+        showToast("⚠️ Insufficient funds! Click '💳 + Add Cash' to deposit.");
         return false;
       }
       currentWager = wagerVal;
-      coins -= currentWager;
-      updateCoinUI();
+      cashBalance -= currentWager;
+      updateWalletUI();
       return true;
     }
 
@@ -427,16 +402,6 @@
     function triggerShake() {
       document.body.classList.add('shake');
       setTimeout(() => document.body.classList.remove('shake'), 350);
-    }
-
-    function spawnDamagePopup(text) {
-      const el = document.createElement('div');
-      el.className = 'floating-damage';
-      el.innerText = text;
-      el.style.left = (50 + (Math.random() * 20 - 10)) + '%';
-      el.style.top = '40%';
-      document.body.appendChild(el);
-      setTimeout(() => el.remove(), 1000);
     }
 
     function playTone(freq, duration, type = 'sine') {
@@ -455,80 +420,33 @@
       } catch (e) {}
     }
 
-    const bgmNotes = [164.81, 196.00, 220.00, 246.94, 261.63, 220.00, 196.00, 164.81];
-    let noteStep = 0;
-
-    function toggleBGM() {
-      bgmMuted = !bgmMuted;
-      const btn = document.getElementById('bgm-btn');
-      btn.innerText = bgmMuted ? '🎵 BGM' : '🎵 BGM: ON';
-
-      if (!bgmMuted) {
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        bgmInterval = setInterval(() => {
-          try {
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.type = 'square';
-            osc.frequency.value = bgmNotes[noteStep % bgmNotes.length];
-            gain.gain.setValueAtTime(0.03, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.18);
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.start();
-            osc.stop(audioCtx.currentTime + 0.18);
-            noteStep++;
-          } catch(e) {}
-        }, 220);
-      } else {
-        clearInterval(bgmInterval);
-      }
-    }
-
-    function haptic() {
-      if (navigator.vibrate) navigator.vibrate(20);
-    }
-
     function toggleAudio() {
       soundMuted = !soundMuted;
       document.getElementById('audio-btn').innerText = soundMuted ? '🔇 SFX' : '🔊 SFX';
     }
 
     const SFX = {
-      click: () => { playTone(440, 0.08); haptic(); },
-      error: () => { playTone(140, 0.25, 'sawtooth'); triggerShake(); if(navigator.vibrate) navigator.vibrate([40, 40, 40]); },
+      click: () => { playTone(440, 0.08); },
+      error: () => { playTone(140, 0.25, 'sawtooth'); triggerShake(); },
       powerup: () => { playTone(520, 0.08); setTimeout(() => playTone(780, 0.12), 80); },
       win: () => { [523, 659, 783, 1046].forEach((f, i) => setTimeout(() => playTone(f, 0.18), i * 100)); }
     };
 
     const baseAvatars = ['🥷', '👑', '🦊', '🤖', '🐉'];
-    const streakAvatars = ['🦁', '⚡', '👽'];
-    let streak = parseInt(localStorage.getItem('sudoku_streak') || '0');
     let currentAvatarIdx = 0;
     let username = localStorage.getItem('sudoku_username') || ('Player_' + Math.floor(100 + Math.random()*900));
-
-    function getAvailableAvatars() {
-      let unlocked = [...baseAvatars];
-      if (streak >= 1) unlocked.push(streakAvatars[0]);
-      if (streak >= 3) unlocked.push(streakAvatars[1]);
-      if (streak >= 7) unlocked.push(streakAvatars[2]);
-      return unlocked;
-    }
 
     function loadProfile() {
       document.getElementById('username-input').value = username;
       currentAvatarIdx = parseInt(localStorage.getItem('sudoku_avatar_idx') || '0');
-      const avail = getAvailableAvatars();
-      if (currentAvatarIdx >= avail.length) currentAvatarIdx = 0;
-      document.getElementById('user-avatar').innerText = avail[currentAvatarIdx] || '🥷';
+      document.getElementById('user-avatar').innerText = baseAvatars[currentAvatarIdx] || '🥷';
       updateLabels();
-      updateCoinUI();
+      updateWalletUI();
     }
 
     function cycleAvatar() {
-      const avail = getAvailableAvatars();
-      currentAvatarIdx = (currentAvatarIdx + 1) % avail.length;
-      document.getElementById('user-avatar').innerText = avail[currentAvatarIdx];
+      currentAvatarIdx = (currentAvatarIdx + 1) % baseAvatars.length;
+      document.getElementById('user-avatar').innerText = baseAvatars[currentAvatarIdx];
       localStorage.setItem('sudoku_avatar_idx', currentAvatarIdx);
       updateLabels();
       saveToCloudLeaderboard();
@@ -542,19 +460,25 @@
     }
 
     function updateLabels() {
-      const avail = getAvailableAvatars();
-      const currentAvatar = avail[currentAvatarIdx] || '🥷';
+      const currentAvatar = baseAvatars[currentAvatarIdx] || '🥷';
       document.getElementById('you-label').innerText = `${username} ${currentAvatar}`;
     }
 
+    function formatTime(secs) {
+      if (!secs || secs >= 9999) return "--:--";
+      let m = String(Math.floor(secs / 60)).padStart(2, '0');
+      let s = String(secs % 60).padStart(2, '0');
+      return `${m}:${s}`;
+    }
+
     function saveToCloudLeaderboard() {
-      const avail = getAvailableAvatars();
-      const currentAvatar = avail[currentAvatarIdx] || '🥷';
+      const currentAvatar = baseAvatars[currentAvatarIdx] || '🥷';
       if (db) {
         db.ref('leaderboard/' + uid).set({
           name: username,
-          elo: elo,
-          coins: coins,
+          level: userLevel,
+          bestTime: bestTimeSeconds,
+          score: highScore,
           avatar: currentAvatar,
           updatedAt: Date.now()
         });
@@ -562,196 +486,23 @@
     }
 
     function shareResults() {
-      const avail = getAvailableAvatars();
-      const currentAvatar = avail[currentAvatarIdx] || '🥷';
-      const shareText = `⚔️ Sudoku Clash 1v1 Arena\nPlayer: ${username} ${currentAvatar}\n🏆 ELO: ${elo} | Coins: ${coins}🪙\nStreak: ${streak}🔥 | Time: ${secondsElapsed}s\nPlay live: ${window.location.href}`;
+      const currentAvatar = baseAvatars[currentAvatarIdx] || '🥷';
+      const shareText = `⚔️ Sudoku Clash Real Money Arena\nPlayer: ${username} ${currentAvatar}\n🏆 Level: ${userLevel} | Best Time: ${formatTime(bestTimeSeconds)}\nHigh Score: ${highScore} pts\nPlay live: ${window.location.href}`;
       
       if (navigator.share) {
-        navigator.share({
-          title: 'Sudoku Clash Result',
-          text: shareText,
-          url: window.location.href
-        }).catch(() => {});
+        navigator.share({ title: 'Sudoku Clash Result', text: shareText, url: window.location.href }).catch(() => {});
       } else {
         navigator.clipboard.writeText(shareText);
-        const btn = document.getElementById('share-btn');
-        btn.innerText = 'Copied to Clipboard! 📋';
-        setTimeout(() => { btn.innerText = 'Share Victory 📲'; }, 2000);
-      }
-    }
-
-    let bossMode = false;
-    let bossHP = 1000;
-    let bossMaxHP = 1000;
-    let bossAttackInterval = null;
-
-    function startBossRaid() {
-      if (!deductWager()) return;
-      tourneyActive = false;
-      bossMode = true;
-      bossHP = 1000;
-      
-      document.getElementById('opp-label').innerText = "CYBER DRAGON 🐉";
-      document.getElementById('opp-bar').className = "progress-fill fill-boss";
-      document.getElementById('connection-status').innerText = `👾 Co-op Raid (Pot: ${currentWager * 2} Coins)! Defeat the Dragon!`;
-      
-      updateBossUI();
-      startNewGame();
-
-      if (bossAttackInterval) clearInterval(bossAttackInterval);
-      bossAttackInterval = setInterval(() => {
-        if (bossMode && bossHP > 0) {
-          const attacks = ['freeze', 'fog'];
-          const randomAttack = attacks[Math.floor(Math.random() * attacks.length)];
-          receiveAttack(randomAttack);
-        }
-      }, 12000);
-    }
-
-    function updateBossUI() {
-      if (!bossMode) return;
-      let pct = Math.round((bossHP / bossMaxHP) * 100);
-      document.getElementById('opp-pct').innerText = `${bossHP} HP (${pct}%)`;
-      document.getElementById('opp-bar').style.width = pct + '%';
-    }
-
-    function damageBoss(amount) {
-      if (!bossMode || bossHP <= 0) return;
-      bossHP = Math.max(0, bossHP - amount);
-      triggerShake();
-      spawnDamagePopup(`-${amount} HP 💥`);
-      updateBossUI();
-
-      if (conn && conn.open) {
-        conn.send({ type: 'boss_damage', amount: amount });
-      }
-
-      if (bossHP <= 0) {
-        if (bossAttackInterval) clearInterval(bossAttackInterval);
-        triggerGameOver(true, "BOSS SLAIN! ⚔️");
-      }
-    }
-
-    let tourneyActive = false;
-    let tourneyRound = 0;
-    let tourneyBracket = [];
-    const botPool = [
-      { name: "Viper 🐍", avatar: "🐍" },
-      { name: "Shadow 🥷", avatar: "🥷" },
-      { name: "Apex ⚡", avatar: "⚡" },
-      { name: "Titan 🛡️", avatar: "🛡️" },
-      { name: "Blaze 🔥", avatar: "🔥" },
-      { name: "Nova 🌟", avatar: "🌟" },
-      { name: "Cipher 🤖", avatar: "🤖" }
-    ];
-
-    function startTournament() {
-      if (!deductWager()) return;
-      bossMode = false;
-      tourneyActive = true;
-      tourneyRound = 0;
-      const avail = getAvailableAvatars();
-      const userPlayer = { name: `${username} (You)`, avatar: avail[currentAvatarIdx] || '🥷', isUser: true };
-      
-      const shuffledBots = [...botPool].sort(() => Math.random() - 0.5);
-      tourneyBracket = [
-        [
-          { p1: userPlayer, p2: shuffledBots[0], winner: null },
-          { p1: shuffledBots[1], p2: shuffledBots[2], winner: null },
-          { p1: shuffledBots[3], p2: shuffledBots[4], winner: null },
-          { p1: shuffledBots[5], p2: shuffledBots[6], winner: null }
-        ],
-        [ { p1: null, p2: null, winner: null }, { p1: null, p2: null, winner: null } ],
-        [ { p1: null, p2: null, winner: null } ]
-      ];
-
-      renderBracketModal();
-      document.getElementById('tourney-modal').classList.add('active');
-    }
-
-    function renderBracketModal() {
-      const container = document.getElementById('bracket-display');
-      const roundNames = ["Quarterfinals (8 Players)", "Semifinals (4 Players)", "Grand Finals (2 Players)"];
-      
-      let html = '';
-      tourneyBracket.forEach((round, rIdx) => {
-        html += `<div class="bracket-round-title">${roundNames[rIdx]}</div>`;
-        round.forEach((match, mIdx) => {
-          const isUserMatch = (rIdx === tourneyRound && (match.p1?.isUser || match.p2?.isUser));
-          const p1Text = match.p1 ? `${match.p1.name}` : 'TBD';
-          const p2Text = match.p2 ? `${match.p2.name}` : 'TBD';
-          
-          html += `
-            <div class="bracket-match ${isUserMatch ? 'active-match' : ''}">
-              <div>${p1Text} <small>vs</small> ${p2Text}</div>
-              <div class="bracket-winner">${match.winner ? '🏆 ' + match.winner.name : ''}</div>
-            </div>
-          `;
-        });
-      });
-      container.innerHTML = html;
-    }
-
-    function launchTourneyMatch() {
-      document.getElementById('tourney-modal').classList.remove('active');
-      const currentMatch = tourneyBracket[tourneyRound][0];
-      const opp = currentMatch.p1.isUser ? currentMatch.p2 : currentMatch.p1;
-      
-      document.getElementById('opp-label').innerText = `${opp.name}`;
-      document.getElementById('opp-bar').className = "progress-fill fill-opp";
-      document.getElementById('connection-status').innerText = `🥊 Tournament Round ${tourneyRound + 1}: vs ${opp.name}`;
-      startNewGame();
-    }
-
-    function advanceTournament(userWon) {
-      const currentMatch = tourneyBracket[tourneyRound][0];
-      currentMatch.winner = userWon ? currentMatch.p1 : currentMatch.p2;
-
-      tourneyBracket[tourneyRound].forEach((m, idx) => {
-        if (!m.winner) {
-          m.winner = Math.random() > 0.5 ? m.p1 : m.p2;
-        }
-      });
-
-      if (userWon) {
-        if (tourneyRound < 2) {
-          const nextMatch = tourneyBracket[tourneyRound + 1][0];
-          nextMatch.p1 = currentMatch.winner;
-          nextMatch.p2 = tourneyBracket[tourneyRound][1].winner;
-          tourneyRound++;
-          renderBracketModal();
-          setTimeout(() => document.getElementById('tourney-modal').classList.add('active'), 1200);
-        } else {
-          elo += 100;
-          coins += 1000;
-          updateCoinUI();
-          localStorage.setItem('sudoku_elo', elo);
-          updateRankBadge();
-          saveToCloudLeaderboard();
-          showToast("🎉 TOURNAMENT CHAMPION! +100 ELO & +1000 Coins!");
-          tourneyActive = false;
-        }
-      } else {
-        tourneyActive = false;
+        showToast("📋 Results Copied to Clipboard!");
       }
     }
 
     let solution = [], board = [], userBoard = [], candidates = Array.from({length: 81}, () => new Set());
     let selectedCell = null, timerInterval = null, secondsElapsed = 0;
     let powerups = { freeze: 1, fog: 1, hint: 2 };
-    let isFrozen = false, pencilMode = false, oppProgress = 0, botInterval = null;
-    let elo = parseInt(localStorage.getItem('sudoku_elo') || '1000');
+    let isFrozen = false, pencilMode = false, oppProgress = 0;
 
     let peer = null, conn = null, isHost = false, isOnline = false;
-
-    function updateRankBadge() {
-      document.getElementById('elo-val').innerText = elo;
-      const badge = document.getElementById('rank-badge');
-      if (elo >= 1400) badge.innerText = '💎';
-      else if (elo >= 1200) badge.innerText = '🥇';
-      else if (elo >= 1000) badge.innerText = '🥈';
-      else badge.innerText = '🥉';
-    }
 
     function changeTheme(themeName) {
       document.documentElement.setAttribute('data-theme', themeName);
@@ -764,15 +515,30 @@
       btn.classList.toggle('active', pencilMode);
     }
 
-    function seededRandom(seed) {
-      let x = Math.sin(seed++) * 10000;
-      return x - Math.floor(x);
+    function startFreePractice() {
+      isFreePracticeMode = true;
+      currentWager = 0;
+      
+      document.getElementById('opp-progress-panel').style.display = 'none';
+      document.getElementById('connection-status').innerText = '🧩 Free Practice (Solo / No BOT / Untimed Match)';
+      
+      startNewGameUI();
+    }
+
+    function startRealMoneyMatch() {
+      if (!deductWager()) return;
+      isFreePracticeMode = false;
+      
+      document.getElementById('opp-progress-panel').style.display = 'block';
+      document.getElementById('opp-label').innerText = 'Searching Player... 👤';
+      document.getElementById('connection-status').innerText = `💵 Real Money 1v1 Battle Active (Wager: $${currentWager} | Pot: $${currentWager * 2})!`;
+      
+      createRoom("CASH");
     }
 
     function startDailyBlitz() {
-      tourneyActive = false;
-      bossMode = false;
-      document.getElementById('opp-bar').className = "progress-fill fill-opp";
+      isFreePracticeMode = true;
+      document.getElementById('opp-progress-panel').style.display = 'none';
       const todaySeed = parseInt(new Date().toISOString().slice(0,10).replace(/-/g,""));
       generateSudoku('medium', todaySeed);
       document.getElementById('connection-status').innerText = "📅 Playing Today's Daily Blitz Challenge!";
@@ -787,7 +553,7 @@
       board = [...solution];
       let removed = 0;
       while (removed < removal) {
-        let idx = Math.floor((seed ? seededRandom(seed + removed) : Math.random()) * 81);
+        let idx = Math.floor(Math.random() * 81);
         if (board[idx] !== 0) { board[idx] = 0; removed++; }
       }
       userBoard = [...board];
@@ -797,7 +563,7 @@
     function solveSudoku(b, seed = null) {
       for (let i = 0; i < 81; i++) {
         if (b[i] === 0) {
-          let nums = [1,2,3,4,5,6,7,8,9].sort(() => (seed ? seededRandom(seed + i) : Math.random()) - 0.5);
+          let nums = [1,2,3,4,5,6,7,8,9].sort(() => Math.random() - 0.5);
           for (let num of nums) {
             if (isValid(b, i, num)) {
               b[i] = num;
@@ -822,16 +588,7 @@
       return true;
     }
 
-    function quickMatch() {
-      if (!deductWager()) return;
-      tourneyActive = false;
-      bossMode = false;
-      document.getElementById('opp-bar').className = "progress-fill fill-opp";
-      document.getElementById('connection-status').innerText = `⚡ Searching... (Pot: ${currentWager * 2} Coins)`;
-      createRoom("MATCH");
-    }
-
-    function createRoom(customPrefix = "SUDO") {
+    function createRoom(customPrefix = "CASH") {
       isHost = true;
       const rawCode = Math.random().toString(36).substring(2, 6).toUpperCase();
       const code = `${customPrefix}-${rawCode}`;
@@ -842,7 +599,7 @@
         const shortCode = id.replace(`${customPrefix}-`, '');
         document.getElementById('room-code-input').value = shortCode;
         navigator.clipboard.writeText(shortCode);
-        document.getElementById('connection-status').innerText = `🏠 Code: ${shortCode} (Copied!)`;
+        document.getElementById('connection-status').innerText = `🏠 Cash Match Code: ${shortCode} (Copied!) Waiting for Real Player...`;
       });
 
       peer.on('connection', (c) => {
@@ -850,10 +607,8 @@
         c.on('open', () => {
           isOnline = true;
           oppProgress = 0;
-          resetOpponentProgressUI();
-          if (botInterval) clearInterval(botInterval);
-          document.getElementById('connection-status').innerText = "🟢 Real Player Connected!";
-          document.getElementById('opp-label').innerText = "Real Partner 👤";
+          document.getElementById('opp-label').innerText = "Real Player 👤";
+          document.getElementById('connection-status').innerText = "🟢 Real Player Connected! Cash Match Live!";
           setupConnection();
           syncBoardToPeer();
         });
@@ -861,13 +616,12 @@
     }
 
     function joinRoom() {
-      tourneyActive = false;
-      bossMode = false;
-      document.getElementById('opp-bar').className = "progress-fill fill-opp";
+      isFreePracticeMode = false;
+      document.getElementById('opp-progress-panel').style.display = 'block';
       let inputVal = document.getElementById('room-code-input').value.trim().toUpperCase();
-      if (!inputVal) return showToast("Enter Room Code!");
+      if (!inputVal) return showToast("Enter Cash Match Code!");
       
-      const fullCode = inputVal.includes('-') ? inputVal : 'SUDO-' + inputVal;
+      const fullCode = inputVal.includes('-') ? inputVal : 'CASH-' + inputVal;
       peer = new Peer();
 
       peer.on('open', () => {
@@ -876,18 +630,11 @@
           isHost = false;
           isOnline = true;
           oppProgress = 0;
-          resetOpponentProgressUI();
-          if (botInterval) clearInterval(botInterval);
-          document.getElementById('connection-status').innerText = "🟢 Connected to Host!";
-          document.getElementById('opp-label').innerText = "Host Partner 👤";
+          document.getElementById('opp-label').innerText = "Host Opponent 👤";
+          document.getElementById('connection-status').innerText = "🟢 Connected to Host! Cash Match Live!";
           setupConnection();
         });
       });
-    }
-
-    function resetOpponentProgressUI() {
-      document.getElementById('opp-bar').style.width = '0%';
-      document.getElementById('opp-pct').innerText = '0%';
     }
 
     function setupConnection() {
@@ -896,20 +643,11 @@
           oppProgress = data.value;
           document.getElementById('opp-bar').style.width = oppProgress + '%';
           document.getElementById('opp-pct').innerText = oppProgress + '%';
-          if (oppProgress >= 100 && !bossMode) triggerGameOver(false);
-        } else if (data.type === 'boss_damage') {
-          bossHP = Math.max(0, bossHP - data.amount);
-          triggerShake();
-          spawnDamagePopup(`-${data.amount} HP 💥`);
-          updateBossUI();
-          if (bossHP <= 0) triggerGameOver(true, "BOSS SLAIN IN CO-OP! ⚔️");
+          if (oppProgress >= 100) triggerGameOver(false);
         } else if (data.type === 'attack') {
           receiveAttack(data.attack);
         } else if (data.type === 'taunt') {
           displayFloatingTaunt(data.emoji);
-        } else if (data.type === 'rematch') {
-          closeModal();
-          if (isHost) startNewGame();
         } else if (data.type === 'sync') {
           solution = data.solution;
           board = data.board;
@@ -940,11 +678,7 @@
     }
 
     function startNextMatch() {
-      if (tourneyActive) {
-        launchTourneyMatch();
-      } else {
-        startNewGame();
-      }
+      startNewGame();
     }
 
     function renderBoard() {
@@ -1012,7 +746,6 @@
         } else {
           if (num === solution[selectedCell]) {
             SFX.click();
-            if (bossMode) damageBoss(25);
           } else {
             SFX.error();
           }
@@ -1044,12 +777,9 @@
       if (type === 'hint' && selectedCell !== null && board[selectedCell] === 0) {
         userBoard[selectedCell] = solution[selectedCell];
         if (candidates[selectedCell]) candidates[selectedCell].clear();
-        if (bossMode) damageBoss(25);
         renderBoard();
       } else if (conn && conn.open) {
         conn.send({ type: 'attack', attack: type });
-      } else {
-        if (type === 'freeze' && !bossMode) oppProgress = Math.max(0, oppProgress - 8);
       }
     }
 
@@ -1068,29 +798,13 @@
       }
     }
 
-    function startBot() {
-      if (botInterval) clearInterval(botInterval);
-      if (isOnline || bossMode) return;
-      oppProgress = 0;
-      botInterval = setInterval(() => {
-        if (oppProgress < 100) {
-          oppProgress += Math.floor(Math.random() * 3) + 1;
-          document.getElementById('opp-bar').style.width = oppProgress + '%';
-          document.getElementById('opp-pct').innerText = oppProgress + '%';
-          if (oppProgress >= 100) triggerGameOver(false);
-        }
-      }, 1600);
-    }
-
     function checkWinCondition() {
       let isComplete = userBoard.every((val, i) => val === solution[i]);
       if (isComplete) triggerGameOver(true);
     }
 
-    function triggerGameOver(isWin, customMsg = null) {
+    function triggerGameOver(isWin) {
       clearInterval(timerInterval);
-      if (botInterval) clearInterval(botInterval);
-      if (bossAttackInterval) clearInterval(bossAttackInterval);
 
       const modal = document.getElementById('game-modal');
       const title = document.getElementById('modal-title');
@@ -1099,31 +813,33 @@
       if (isWin) {
         SFX.win();
         launchConfetti();
-        elo += bossMode ? 150 : 25;
-        const rewardCoins = currentWager * 2;
-        coins += rewardCoins;
-        streak += 1;
-        title.innerText = customMsg || "VICTORY! 🏆";
-        desc.innerText = `Finished in ${secondsElapsed}s! Won +${rewardCoins} Coins & +${bossMode ? 150 : 25} ELO!`;
+        
+        // Progression & Score Logic
+        userLevel += 1;
+        if (secondsElapsed < bestTimeSeconds) bestTimeSeconds = secondsElapsed;
+        
+        const earnedScore = Math.max(100, (userLevel * 1000) - (secondsElapsed * 5));
+        highScore += earnedScore;
+
+        let winMsg = `Completed Level in ${formatTime(secondsElapsed)}! +${earnedScore} pts earned!`;
+
+        if (currentWager > 0) {
+          const cashPrize = currentWager * 2;
+          cashBalance += cashPrize;
+          winMsg += ` 💰 Cash Won: $${cashPrize.toFixed(2)}!`;
+        }
+
+        title.innerText = "LEVEL CLEARED! 🏆";
+        desc.innerText = winMsg;
       } else {
         SFX.error();
-        elo = Math.max(800, elo - 15);
-        streak = 0;
-        title.innerText = "DEFEAT! 💀";
+        title.innerText = "MATCH LOST! 💀";
         title.style.color = "var(--accent-danger)";
-        desc.innerText = bossMode ? "The Dragon overwhelmed your team!" : `Opponent solved first! Lost ${currentWager} Coins & -15 ELO`;
+        desc.innerText = `Opponent solved first! Lost $${currentWager.toFixed(2)} wager stake.`;
       }
 
-      updateCoinUI();
-      localStorage.setItem('sudoku_elo', elo);
-      localStorage.setItem('sudoku_streak', streak);
-      loadProfile();
-      updateRankBadge();
+      updateWalletUI();
       saveToCloudLeaderboard();
-
-      if (tourneyActive) {
-        advanceTournament(isWin);
-      }
 
       modal.classList.add('active');
     }
@@ -1135,7 +851,7 @@
     function openLeaderboard() {
       const modal = document.getElementById('leaderboard-modal');
       const tbody = document.getElementById('leader-body');
-      tbody.innerHTML = '<tr><td colspan="3">Syncing Cloud Rankings...</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="5">Syncing Global Level Leaderboard...</td></tr>';
       modal.classList.add('active');
 
       if (db) {
@@ -1144,7 +860,7 @@
           snapshot.forEach((child) => {
             list.push(child.val());
           });
-          list.sort((a,b) => b.elo - a.elo);
+          list.sort((a,b) => (b.level - a.level) || (b.score - a.score));
           renderLeaderboardRows(list.slice(0, 10));
         }).catch(() => renderFallbackLeaderboard());
       } else {
@@ -1162,27 +878,30 @@
         <tr>
           <td>#${idx + 1}</td>
           <td>${player.name || 'Player'} ${player.avatar || '🥷'}</td>
-          <td><b>${player.elo}</b></td>
+          <td><b>Lvl ${player.level || 1}</b></td>
+          <td>${formatTime(player.bestTime)}</td>
+          <td><b>${player.score || 0}</b></td>
         </tr>
       `).join('');
     }
 
     function renderFallbackLeaderboard() {
       const tbody = document.getElementById('leader-body');
-      const avail = getAvailableAvatars();
-      const currentAvatar = avail[currentAvatarIdx] || '🥷';
+      const currentAvatar = baseAvatars[currentAvatarIdx] || '🥷';
       const mockLeaders = [
-        { name: "CyberKing 👑", elo: 1650 },
-        { name: "GridMaster ⚡", elo: 1520 },
-        { name: "SudokuNinja 🥷", elo: 1440 },
-        { name: `${username} ${currentAvatar}`, elo: elo }
-      ].sort((a,b) => b.elo - a.elo);
+        { name: "CyberKing 👑", level: 18, bestTime: 112, score: 24500 },
+        { name: "GridMaster ⚡", level: 14, bestTime: 135, score: 18900 },
+        { name: "SudokuNinja 🥷", level: 11, bestTime: 150, score: 14200 },
+        { name: `${username} ${currentAvatar}`, level: userLevel, bestTime: bestTimeSeconds, score: highScore }
+      ].sort((a,b) => (b.level - a.level) || (b.score - a.score));
 
       tbody.innerHTML = mockLeaders.map((player, idx) => `
         <tr>
           <td>#${idx + 1}</td>
           <td>${player.name}</td>
-          <td><b>${player.elo}</b></td>
+          <td><b>Lvl ${player.level}</b></td>
+          <td>${formatTime(player.bestTime)}</td>
+          <td><b>${player.score}</b></td>
         </tr>
       `).join('');
     }
@@ -1203,14 +922,11 @@
       clearInterval(timerInterval);
       timerInterval = setInterval(() => {
         secondsElapsed++;
-        let m = String(Math.floor(secondsElapsed / 60)).padStart(2, '0');
-        let s = String(secondsElapsed % 60).padStart(2, '0');
-        document.getElementById('timer').innerText = `${m}:${s}`;
+        document.getElementById('timer').innerText = formatTime(secondsElapsed);
       }, 1000);
 
       renderBoard();
       syncBoardToPeer();
-      if (!isOnline && !bossMode) startBot();
     }
 
     function startNewGame() {
@@ -1244,9 +960,8 @@
 
     window.onload = () => {
       loadProfile();
-      updateRankBadge();
       saveToCloudLeaderboard();
-      startNewGame();
+      startFreePractice();
     };
   </script>
 </body>

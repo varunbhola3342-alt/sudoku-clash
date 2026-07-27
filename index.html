@@ -522,7 +522,7 @@
       document.getElementById('opp-progress-panel').style.display = 'none';
       document.getElementById('connection-status').innerText = '🧩 Free Practice (Solo / No BOT / Untimed Match)';
       
-      startNewGameUI();
+      startNewGame();
     }
 
     function startRealMoneyMatch() {
@@ -534,6 +534,7 @@
       document.getElementById('connection-status').innerText = `💵 Real Money 1v1 Battle Active (Wager: $${currentWager} | Pot: $${currentWager * 2})!`;
       
       createRoom("CASH");
+      startNewGame();
     }
 
     function startDailyBlitz() {
@@ -688,10 +689,10 @@
       for (let i = 0; i < 81; i++) {
         const cell = document.createElement('div');
         cell.className = 'cell';
-        if (board[i] !== 0) {
+        if (board[i] !== undefined && board[i] !== 0) {
           cell.innerText = board[i];
           cell.classList.add('given');
-        } else if (userBoard[i] !== 0) {
+        } else if (userBoard[i] !== undefined && userBoard[i] !== 0) {
           cell.innerText = userBoard[i];
           cell.classList.add('user-entered');
         } else if (candidates[i] && candidates[i].size > 0) {
@@ -799,6 +800,7 @@
     }
 
     function checkWinCondition() {
+      if (!userBoard || userBoard.length !== 81 || !solution || solution.length !== 81) return;
       let isComplete = userBoard.every((val, i) => val === solution[i]);
       if (isComplete) triggerGameOver(true);
     }
